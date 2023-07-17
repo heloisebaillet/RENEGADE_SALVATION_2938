@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-/* Route des infrastructures*/
+/* Routes des infrastructures*/
 Route::post('/structures/{type?}',[StructureController::class, 'create'])->name('mines.create');
 Route::get('/structures/{type?}',[StructureController::class, 'read'])->name('mines.read');
 Route::put('/structures/{id?}',[StructureController::class, 'addlevel'])->name('mines.addlevel');

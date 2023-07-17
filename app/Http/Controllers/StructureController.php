@@ -71,7 +71,7 @@ class StructureController extends Controller
     public function addlevel(Request $request, $id){
         // A modifier, quand le controller User sera créé
         $user_id ="1";
-        $minerais = 300;
+        $minerais = 200;
 
         if ($minerais >= 300){
             $mine = Structure::where('user_id', $user_id)->where('id', $id)->first();
