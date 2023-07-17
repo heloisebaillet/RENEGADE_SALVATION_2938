@@ -18,7 +18,7 @@ class StructureController extends Controller
         // Création d'une mine
             if ($type == "mine"){
             // A verifier si l'utilisateur a assez de minerais avec un if
-                $energy_consumption ="300";
+                $energy_consumption ="1";
                 $mine = new Structure();
                 $mine->user_id = $user_id;
                 $mine->type = $type;
@@ -29,7 +29,7 @@ class StructureController extends Controller
 
             if ($type == "raffinery"){
                     // A verifier si l'utilisateur a assez de minerais avec un if
-                $energy_consumption ="300";
+                $energy_consumption ="2";
                 $raffinery = new Structure();
                 $raffinery->user_id = $user_id;
                 $raffinery->type = $type;
@@ -40,7 +40,7 @@ class StructureController extends Controller
                 
             if ($type == "centrale"){
                     // A verifier si l'utilisateur a assez de minerais avec un if
-                $energy_consumption ="500";
+                $energy_consumption ="0";
                 $centrale = new Structure();
                 $centrale->user_id = $user_id;
                 $centrale->type = $type;
