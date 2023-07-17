@@ -2,98 +2,84 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlanetarySystem;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Response;
+//use Illuminate\Support\Facades\Auth;
 
 class PlanetarySystemController extends Controller
 {
-public function index()
-{
-$user = auth()->user();
-$system = $user->system;
+    public function create(Request $request)
+    {
+        // à modifier quand fait 
+        // $user_id = Auth::user()->id;
+        //$user_id = '1';
+        $name = 'planetary_system';
+        $x_coord = random_int(1, 999);
+        $y_coord = random_int(1, 999);
+        //$map = ($x_coord . $y_coord);
+        $localisation = ('map');
 
-return view('system.index', compact('system'));
-}
+        $verify = PlanetarySystem::where('x_coord', $x_coord)->where('y_coord', $y_coord)->get();
+        if ($verify != "") {
 
-public function welcome()
-{
-$system = PlanetarySystem::latest()->get();
-// $comments = Comment::whereIn('post_id', $list)->get();
-// $likes = Like::all();
-// $commentLikes = CommentLike::all();
+            $planetary_system = new PlanetarySystem();
+            $planetary_system->name = $name;
+            $planetary_system->x_coord = $x_coord;
+            $planetary_system->y_coord = $y_coord;
+            //$planetary_system->map = $map;
+            //$planetary_system->localisation = $localisation;
+            $planetary_system->save();
 
-$directory = '';
-if ($posts->isNotEmpty()) {
-$directory = 'public/images/' . $posts->first()->upid . '.jpg';
-}
+            return Response()->json()['Système créé, vous vous trouvez :' . $planetary_system->localisation];
+        } else {
+            $x_coord = $x_coord = (rand(1, 999));
+            $y_coord = (rand(1, 999));
+            $map = ('x_coord' . 'y_coord');
+            $localisation = ('map');
 
-return view('welcome', compact('posts', 'comments', 'likes', 'commentLikes', 'directory'));
-}
+            $planetary_system = new PlanetarySystem();
+            $planetary_system->name = $request->name;
+            $planetary_system->x_coord = $x_coord;
+            $planetary_system->y_coord = $y_coord;
+            //$planetary_system->map = $map;
+            //$planetary_system->localisation = $localisation;
+            $planetary_system->save();
 
+            return Response()->json()['Système créé, vous vous trouvez :' . $planetary_system->localisation];
+        }
+    }
+    // public function store(Request $request, Localisation $localisation, Map $map, XCoord $x_coord, YCoord $y_coord)
+    // {
+    //     $request->validate([
+    //         'name' => 'required|string',
+    //     ]);
 
-public function create()
-{
-return view('posts.create');
-}
+    //     $planetary_system = [
+    //         'map' => $map,
+    //         'name' => $request->name,
+    //         'localisation' => $localisation,
+    //         'x_coord' => $x_coord,
+    //         'y_coord' => $y_coord,
+    //     ];
 
-public function store(Request $request)
-{
-$info = $request->validate([
-'title' => 'required',
-'content' => 'required',
-'image' => 'mimes:jpg,png,gif|max:8192'
-]);
+    //     PlanetarySystem::store([
+    //         'map' => $map,
+    //         'name' => $request->name,
+    //         'localisation' => $localisation,
+    //         'x_coord' => $x_coord,
+    //         'y_coord' => $y_coord,
+    //     ]);
 
-$picture = $request->file('image');
-if ($picture != null) {
-$img = Storage::putFile('public/images', $picture);
-}
-else {
-$img = null;
-}
-$post = new Post();
-$post->title = $request->title;
-$post->content = $request->content;
-if ($img != null) {
-$post->image = $img;}
+    //     // à arranger plus tard
+    //     return redirect('/index')->with('success', '✔️ System successfully created.');
+    // }
 
-$post->user_id = auth()->id();
-$post->save();
-return redirect()->route('welcome')->with('success', 'Post created successfully.');
-}
+    public function destroy(PlanetarySystem $planetary_system)
+    {
+        $planetary_system->delete();
 
-
-public function edit($id)
-{
-$post = Post::findOrFail($id);
-return view('posts.edit', compact('post'));
-}
-
-
-public function update(Request $request, $id)
-{
-$request->validate([
-'title' => 'required',
-'content' => 'required',
-'image' => 'nullable'
-
-]);
-
-$post = Post::findOrFail($id);
-$post->title = $request->title;
-$post->content = $request->content;
-$post->upid = $request->upid;
-$post->save();
-
-return redirect()->route('index')->with('success', 'Post updated successfully.');
-}
-
-
-public function destroy(Post $post)
-{
-$post->delete();
-return redirect()->route('index')->with('success', 'Post deleted successfully.');
-}
+        // à arranger plus tard
+        return redirect()->route('index')->with('success', '✔️ System successfully deleted.');;
+    }
 }

@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PlanetarySystem extends Model
+class XCoord extends Model
 {
-    protected $table = 'planetary_system';
     protected $fillable = [
+        'map',
         'name',
         'x_coord',
         'y_coord',
+        'localisation',
     ];
 }
