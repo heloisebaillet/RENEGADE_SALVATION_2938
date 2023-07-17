@@ -14,7 +14,7 @@ class PlanetarySystemController extends Controller
         // à modifier quand fait 
         // $user_id = Auth::user()->id;
         //$user_id = '1';
-        $name = 'planetary_system';
+        $name = 'alpha';
         $x_coord = random_int(1, 999);
         $y_coord = random_int(1, 999);
         //$map = ($x_coord . $y_coord);
@@ -31,7 +31,7 @@ class PlanetarySystemController extends Controller
             //$planetary_system->localisation = $localisation;
             $planetary_system->save();
 
-            return Response()->json('Système créé, vous vous trouvez :' . $planetary_system->localisation);
+            return Response()->json('Système ' . $planetary_system->name . ' créé !');
         } else {
             $x_coord = $x_coord = (rand(1, 999));
             $y_coord = (rand(1, 999));
