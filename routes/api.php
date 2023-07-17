@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\StructureController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+/* Routes des infrastructures*/
+Route::post('/structures/{type?}',[StructureController::class, 'create'])->name('mines.create');
+Route::get('/structures/{type?}',[StructureController::class, 'read'])->name('mines.read');
+Route::put('/structures/{id?}',[StructureController::class, 'addlevel'])->name('mines.addlevel');
+Route::delete('/structures/{id?}',[StructureController::class, 'delete'])->name('mines.delete');
