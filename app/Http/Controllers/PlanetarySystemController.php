@@ -31,12 +31,10 @@ class PlanetarySystemController extends Controller
             //$planetary_system->localisation = $localisation;
             $planetary_system->save();
 
-            return Response()->json()['Système créé, vous vous trouvez :' . $planetary_system->localisation];
+            return Response()->json('Système créé, vous vous trouvez :' . $planetary_system->localisation);
         } else {
             $x_coord = $x_coord = (rand(1, 999));
             $y_coord = (rand(1, 999));
-            $map = ('x_coord' . 'y_coord');
-            $localisation = ('map');
 
             $planetary_system = new PlanetarySystem();
             $planetary_system->name = $request->name;
@@ -46,7 +44,7 @@ class PlanetarySystemController extends Controller
             //$planetary_system->localisation = $localisation;
             $planetary_system->save();
 
-            return Response()->json()['Système créé, vous vous trouvez :' . $planetary_system->localisation];
+            return Response()->json()['Système créé'];
         }
     }
     // public function store(Request $request, Localisation $localisation, Map $map, XCoord $x_coord, YCoord $y_coord)
