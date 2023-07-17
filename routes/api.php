@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 /* Routes des infrastructures*/
-Route::post('/structures/{type?}',[StructureController::class, 'create'])->name('mines.create');
-Route::get('/structures/{type?}',[StructureController::class, 'read'])->name('mines.read');
-Route::put('/structures/{id?}',[StructureController::class, 'addlevel'])->name('mines.addlevel');
-Route::delete('/structures/{id?}',[StructureController::class, 'delete'])->name('mines.delete');
+Route::post('/structures/{type?}',[StructureController::class, 'create'])->name('structures.create');
+Route::get('/structures/{type?}',[StructureController::class, 'read'])->name('structures.read');
+Route::put('/structures/{id?}',[StructureController::class, 'addlevel'])->name('structures.addlevel');
+Route::delete('/structures/{id?}',[StructureController::class, 'delete'])->name('structures.delete');
