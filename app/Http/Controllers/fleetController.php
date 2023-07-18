@@ -20,6 +20,7 @@ class FleetController extends Controller
             if ($type == "fighter") {
                 //$fuel_consumption ="";
                 $fighter = new Fleet();
+                $fighter->user_id = $user_id;
                 $fighter->type = $type;
                 $fighter->quantity += 1;
 
@@ -35,6 +36,7 @@ class FleetController extends Controller
             if ($type == "frigate") {
                 //$fuel_consumption ="";
                 $frigate = new Fleet();
+                $frigate->user_id = $user_id;
                 $frigate->type = $type;
                 $frigate->quantity += 1;
 
@@ -51,6 +53,7 @@ class FleetController extends Controller
                 //$fuel_consumption ="";
                 $cruiser = new Fleet();
                 $cruiser->type = $type;
+                $cruiser->user_id = $user_id;
                 $cruiser->quantity += 1;
 
                 $minerais = 800;
@@ -66,17 +69,30 @@ class FleetController extends Controller
                 //$fuel_consumption ="";
                 $destroyer = new Fleet();
                 $destroyer->type = $type;
+                $destroyer->user_id = $user_id;
+
+                return Response()->json($destroyer, 201);
+            }
+        }
+    }
+    public function Update(Request $request, $type = null)
+    {
+
+
+        if ($type == "cruiser" || $type == "destroyer" || $type == "fighter" || $type == "frigate") {
+            if ($type == "destroyer") {
                 $destroyer->quantity += 1;
 
                 $minerais = 2000;
 
-
                 if ($minerais >= 2000) {
-                    return Response()->json($destroyer, 201);
+                    return Response()->json($frigate, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
                 }
             }
+
+            $destroyer->quantity += 1;
         }
     }
 }
