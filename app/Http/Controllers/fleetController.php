@@ -86,7 +86,7 @@ class FleetController extends Controller
                 $minerais = 2000;
 
                 if ($minerais >= 2000) {
-                    return Response()->json($frigate, 201);
+                    return Response()->json($destroyer, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
                 }
