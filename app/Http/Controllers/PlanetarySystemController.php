@@ -38,7 +38,7 @@ class PlanetarySystemController extends Controller
             $planetary_system->y_coord = $y_coord;
             $planetary_system->save();
 
-            return Response()->json()['Système créé'];
+            return Response()->json('Système ' . $planetary_system->name . ' créé !');
         }
     }
     // public function store(Request $request, Localisation $localisation, Map $map, XCoord $x_coord, YCoord $y_coord)
