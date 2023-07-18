@@ -7,7 +7,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Fleet extends Model
+class ships extends Model
 {
     protected $table = 'ships';
     protected $fillable = [
