@@ -2,16 +2,25 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+
+
 
 use Illuminate\Database\Eloquent\Model;
 
+class Cruiser extends Model
+{
+    protected $table = 'Cruiser';
+    protected $fillable = [
+        'created_at',
+        'type',
+        'quantity',
+        'structure_id',
+        'updated_at'
+    ];
+}
 class Destroyer extends Model
 {
+    protected $table = 'fleet';
     protected $fillable = [
         'created_at',
         'type',

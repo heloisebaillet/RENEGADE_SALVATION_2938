@@ -20,28 +20,23 @@ class fleetController extends Controller
 
     public function index()
     {
-        $tmp = "<h1>Votre Flotte</h1>
-        <table>
-        <tr>
-            <td>Attaque</td>
-            <td>défense</td>
-            <td>Carburant</td>
-            <td>Cout de production</td>
-            <td>Temps de construction</td>
+       
+
+     
+
       
-    </tr>";
-        foreach ($this->fleet as $ship => $fleet) {
-            $tmp .= "<tr><td><a href='/ships/$ship'>$ship</a></td><td>"
-            .$ship ['attack']."</td><td>"
-            .$ship ['defense']."</td><td>"
-            .$ship ['fuel']."</td><td>"
-            .$ship ['cost']."</td><td>"
-            .$ship ['construction']."</td><td>"
-            ."<form action='/fleet/$ship'method='post'>
-            
-        }
-
-        $tmp .= "</table>";
-
-        return $tmp;
+    
     }
+public function create (Request $request, $type = null){
+    if($type == "Cruiser" || $type == "Destroyer" || $type == "chasseur" || $type == "fregate"){
+        
+        if ($type == "cruiser")
+            $fuel_consumption ="";
+            $cruiser = new Cruiser();
+            $cruiser->user_id = $user_id;
+            $cruiser->type = $type;
+            return Response()->json($cruiser, );}
+
+}
+
+        
