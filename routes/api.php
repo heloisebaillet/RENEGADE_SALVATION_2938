@@ -20,7 +20,10 @@ use App\Http\Controllers\AuthController;
 */
 /* Route Login */
 
-Route::post('/login', 'AuthController@login');
+Route::post('/login', [AuthController::class, 'login']);
+
+
+
 
 /* Route du système planétaire */
 Route::post('/index', [PlanetarySystemController::class, 'create'])->name('planetary_system.create');
