@@ -3,40 +3,80 @@
 
 namespace App\Http\Controllers;
 
-use Faker\Core\Number;
+use App\Models\Fleet;
+use App\Models\Structure;
 use Illuminate\Http\Request;
-use PhpParser\Node\Stmt\Nop;
-use App\Models\Cruiser;
-use App\Models\Destroyer;
+use Illuminate\Http\Response;
 
-class fleetController extends Controller
+
+class FleetController extends Controller
 {
-    private $fleet = [
-        'Chasseur' => ['attack' => '11','defense'=> '7','fuel'=> '1/10','cost'=> '50','construction'=> '1h','image'=> 'chasseur.jpg'],
-        'Fregate'=> ['attack' => '13','defense'=> '5','fuel'=> '2/10','cost'=> '200','construction'=> '2h', 'image'=>'fregate.jpg'],
-        'Cruiser' => ['attack' => '14','defense'=> '9','fuel'=> '4/10','cost'=> '800','construction'=> '4h', 'image'=>'croiseur.jpg'],
-        'Destroyer' => ['attack' => '27','defense'=> '20','fuel'=> '8/10','cost'=> '2000','construction'=> '8h','image'=>'destroyer'],
-    ];
 
-    public function index()
+    public function create(Request $request, $type = null)
     {
-       
+        $user_id = "1";
+        if ($type == "cruiser" || $type == "destroyer" || $type == "fighter" || $type == "frigate") {
 
-     
+            if ($type == "fighter") {
+                //$fuel_consumption ="";
+                $fighter = new Fleet();
+                $fighter->type = $type;
+                $fighter->quantity += 1;
 
-      
-    
+                $minerais = 50;
+
+                if ($minerais >= 50) {
+                    return Response()->json($fighter, 201);
+                } else {
+                    return Response()->json(['success' => 'false'], 400);
+                }
+            }
+
+            if ($type == "frigate") {
+                //$fuel_consumption ="";
+                $frigate = new Fleet();
+                $frigate->type = $type;
+                $frigate->quantity += 1;
+
+                $minerais = 200;
+
+                if ($minerais >= 200) {
+                    return Response()->json($frigate, 201);
+                } else {
+                    return Response()->json(['success' => 'false'], 400);
+                }
+            }
+
+            if ($type == "cruiser") {
+                //$fuel_consumption ="";
+                $cruiser = new Fleet();
+                $cruiser->type = $type;
+                $cruiser->quantity += 1;
+
+                $minerais = 800;
+
+                if ($minerais >= 800) {
+                    return Response()->json($cruiser, 201);
+                } else {
+                    return Response()->json(['success' => 'false'], 400);
+                }
+            }
+
+            if ($type == "destroyer") {
+                //$fuel_consumption ="";
+                $destroyer = new Fleet();
+                $destroyer->type = $type;
+                $destroyer->quantity += 1;
+
+                $minerais = 2000;
+
+
+                if ($minerais >= 2000) {
+                    return Response()->json($destroyer, 201);
+                } else {
+                    return Response()->json(['success' => 'false'], 400);
+                }
+            }
+        }
     }
-public function create (Request $request, $type = null){
-    if($type == "Cruiser" || $type == "Destroyer" || $type == "chasseur" || $type == "fregate"){
-        
-        if ($type == "cruiser")
-            $fuel_consumption ="";
-            $cruiser = new Cruiser();
-            $cruiser->user_id = $user_id;
-            $cruiser->type = $type;
-            return Response()->json($cruiser, );}
-
 }
-
-        
