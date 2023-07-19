@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\AttackController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PlanetarySystemController;
+use App\Http\Controllers\StructureController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,13 +17,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+/*Routes Protegés par le middleware*/
+
+Route::middleware('jwt.verify')->group(function () {
+    /* Route du système planétaire */
+    Route::post('/index', [PlanetarySystemController::class, 'create'])
+        ->name('planetary_system.create');
+
+    /* Routes des infrastructures */
+    Route::post('/structures/{type?}', [StructureController::class, 'create'])
+        ->name('structures.create');
+    Route::get('/structures/{type?}', [StructureController::class, 'read'])
+        ->name('structures.read');
+    Route::put('/structures/{id?}', [StructureController::class, 'addlevel'])
+        ->name('structures.addlevel');
+    Route::delete('/structures/{id?}', [StructureController::class, 'delete'])
+        ->name('structures.delete');
 });
 
-Route::get('/user', [UserController::class, 'create'])->name('create-user');
-
-Route::post('/user', [UserController::class, 'store'])->name('store-user');
-
-
-//Route::post('/user', [AttackControlle::class, 'store'])->name('attack');
+/* Route du controller AuthController avec JWT  */
+Route::controller(AuthController::class)->group(function () {
+    Route::post('login', 'login');
+    Route::post('register', 'register');
+    Route::post('logout', 'logout');
+    Route::post('refresh', 'refresh');
+});
