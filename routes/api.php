@@ -5,7 +5,7 @@ use App\Http\Controllers\PlanetarySystemController;
 use App\Http\Controllers\StructureController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+
 
 
 /*
@@ -22,7 +22,7 @@ use App\Http\Controllers\AuthController;
 
 /*Routes Protegés par le middleware*/
 
-Route::middleware('jwt.verify')->group(function() {
+Route::middleware('jwt.verify')->group(function () {
     /* Route du système planétaire */
     Route::post('/index', [PlanetarySystemController::class, 'create'])
         ->name('planetary_system.create');
@@ -44,6 +44,4 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
-
 });
-
