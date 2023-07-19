@@ -21,7 +21,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/user', [UserController::class, 'create'])->name('create-user');
+
 Route::post('/user', [UserController::class, 'store'])->name('store-user');
 
 
-Route::post('/user', [◊AttackControlle::class, 'store'])->name('attack');
+//Route::post('/user', [AttackControlle::class, 'store'])->name('attack');
