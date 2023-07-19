@@ -5,16 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\PlanetarySystem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+
 //use Illuminate\Support\Facades\Auth;
 
 class PlanetarySystemController extends Controller
 {
     public function create(Request $request)
     {
-        // à modifier quand fait 
-        // $user_id = Auth::user()->id;
-        //$user_id = '1';
-        $name = 'alpha';
+        $user_id = Auth::user()->id;
+        // pour le moment : 
+        $name = "whatever";
+        // quand name system implanté dans formulaire d'inscription user :
+        //$user_id = Auth::user()->name;
         $x_coord = random_int(1, 999);
         $y_coord = random_int(1, 999);
 
