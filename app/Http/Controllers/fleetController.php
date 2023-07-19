@@ -24,9 +24,9 @@ class FleetController extends Controller
                 $fighter->type = $type;
                 $fighter->quantity += 1;
 
-                $minerais = 50;
+                $ore = 50;
 
-                if ($minerais >= 50) {
+                if ($ore >= 50) {
                     return Response()->json($fighter, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
@@ -40,9 +40,9 @@ class FleetController extends Controller
                 $frigate->type = $type;
                 $frigate->quantity += 1;
 
-                $minerais = 200;
+                $ore = 200;
 
-                if ($minerais >= 200) {
+                if ($ore >= 200) {
                     return Response()->json($frigate, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
@@ -56,9 +56,9 @@ class FleetController extends Controller
                 $cruiser->user_id = $user_id;
                 $cruiser->quantity += 1;
 
-                $minerais = 800;
+                $ore = 800;
 
-                if ($minerais >= 800) {
+                if ($ore >= 800) {
                     return Response()->json($cruiser, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
@@ -83,44 +83,44 @@ class FleetController extends Controller
 
         if ($type == "fighter" || $type == "frigate" || $type == "cruiser" || $type == "destroyer") {
             if ($type == "fighter") {
-                $minerais = 50;
+                $ore = 50;
                 $type->quantity += 1;
                 $type->save();
 
-                if ($minerais >= 50) {
+                if ($ore >= 50) {
                     return Response()->json($type, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
                 }
             }
             if ($type == "frigate") {
-                $minerais = 200;
+                $ore = 200;
                 $type->quantity += 1;
                 $type->save();
 
-                if ($minerais >= 200) {
+                if ($ore = 200) {
                     return Response()->json($type, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
                 }
             }
             if ($type == "cruiser") {
-                $minerais = 800;
+                $ore = 800;
                 $type->quantity += 1;
                 $type->save();
 
-                if ($minerais >= 800) {
+                if ($ore >= 800) {
                     return Response()->json($type, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
                 }
             }
             if ($type == "destroyer") {
-                $minerais = 2000;
+                $ore = 2000;
                 $type->quantity += 1;
                 $type->save();
 
-                if ($minerais >= 2000) {
+                if ($ore >= 2000) {
                     return Response()->json($type, 201);
                 } else {
                     return Response()->json(['success' => 'false'], 400);
