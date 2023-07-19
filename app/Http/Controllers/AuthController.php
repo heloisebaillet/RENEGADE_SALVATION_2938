@@ -1,38 +1,100 @@
 <?php
 
+namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+
+    public function __construct()
     {
-        $validate = $request->validate([
-            'type_user' => ['required'],
-            'firstname' => ['required'],
-            'lastname' => ['required'],
-            'email' => ['required', 'email', 'unique:users'],
-            'password' => ['required'],
-            'username' => ['required', 'unique:users'],
-            'date_of_birth' => ['required', 'date'],
+        $this->middleware('auth:api', ['except' => ['login','register']]);
+    }
+
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string'
+
+        ]);
+        $credentials = $request->only('email', 'password');
+
+        $token = Auth::attempt($credentials);
+        if (!$token) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $user = Auth::user();
+        return response()->json([
+                'status' => 'success',
+                'user' => $user,
+                'authorisation' => [
+                    'token' => $token,
+                    'type' => 'bearer',
+                ]
+            ]);
+
+    }
+
+    public function register(Request $request){
+        $request->validate([
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string',
+            'firstname'=> 'required|string',
+            'lastname'=> 'required|string',
+            'username' => 'required|string',
+            'date_of_birth'=> 'required'
         ]);
 
         $user = User::create([
-            'type_user' => $validate['required'],
-            'firstname' => $validate['firstname'],
-            'lastname' => $validate['lastname'],
-            'email' => $validate['email'],
-            'password' => Hash::make($validate['password']),
-            'username' => $validate['username'],
-            'date_of_birth' => $validate['date_of_birth'],
+            'firstname' => $request->firstname,
+            'lastname' => $request->lastname,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'username' => $request->username,
+            'date_of_birth' => $request->date_of_birth,
         ]);
 
-        if ($user) {
-            return response()->json(['success' => true], 200);
-        } else {
-            return response()->json(['success' => false], 500);
-        }
+        $token = Auth::login($user);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User created successfully',
+            'user' => $user,
+            'authorisation' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ]);
     }
+
+    public function logout()
+    {
+        Auth::logout();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully logged out',
+        ]);
+    }
+
+    public function refresh()
+    {
+        return response()->json([
+            'status' => 'success',
+            'user' => Auth::user(),
+            'authorisation' => [
+                'token' => Auth::refresh(),
+                'type' => 'bearer',
+            ]
+        ]);
+    }
+
 }
+

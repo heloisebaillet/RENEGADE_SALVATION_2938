@@ -17,8 +17,6 @@ class PlanetarySystemController extends Controller
         $name = 'alpha';
         $x_coord = random_int(1, 999);
         $y_coord = random_int(1, 999);
-        //$map = ($x_coord . $y_coord);
-        $localisation = ('map');
 
         $verify = PlanetarySystem::where('x_coord', $x_coord)->where('y_coord', $y_coord)->get();
         if ($verify != "") {
@@ -27,8 +25,6 @@ class PlanetarySystemController extends Controller
             $planetary_system->name = $name;
             $planetary_system->x_coord = $x_coord;
             $planetary_system->y_coord = $y_coord;
-            //$planetary_system->map = $map;
-            //$planetary_system->localisation = $localisation;
             $planetary_system->save();
 
             return Response()->json('Système ' . $planetary_system->name . ' créé !');
@@ -40,11 +36,9 @@ class PlanetarySystemController extends Controller
             $planetary_system->name = $request->name;
             $planetary_system->x_coord = $x_coord;
             $planetary_system->y_coord = $y_coord;
-            //$planetary_system->map = $map;
-            //$planetary_system->localisation = $localisation;
             $planetary_system->save();
 
-            return Response()->json()['Système créé'];
+            return Response()->json('Système ' . $planetary_system->name . ' créé !');
         }
     }
     // public function store(Request $request, Localisation $localisation, Map $map, XCoord $x_coord, YCoord $y_coord)

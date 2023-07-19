@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
 use App\Http\Controllers\StructureController;
 use Illuminate\Http\Request;
@@ -18,18 +18,32 @@ use App\Http\Controllers\AuthController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-/* Route Login */
-
-Route::post('/login', [AuthController::class, 'login']);
-
-Route::post('/register', [AuthController::class, 'register']);
 
 
+/*Routes Protegés par le middleware*/
 
-/* Route du système planétaire */
-Route::post('/index', [PlanetarySystemController::class, 'create'])->name('planetary_system.create');
-/* Routes des infrastructures*/
-Route::post('/structures/{type?}', [StructureController::class, 'create'])->name('structures.create');
-Route::get('/structures/{type?}', [StructureController::class, 'read'])->name('structures.read');
-Route::put('/structures/{id?}', [StructureController::class, 'addlevel'])->name('structures.addlevel');
-Route::delete('/structures/{id?}', [StructureController::class, 'delete'])->name('structures.delete');
+Route::middleware('jwt.verify')->group(function() {
+    /* Route du système planétaire */
+    Route::post('/index', [PlanetarySystemController::class, 'create'])
+        ->name('planetary_system.create');
+
+    /* Routes des infrastructures */
+    Route::post('/structures/{type?}', [StructureController::class, 'create'])
+        ->name('structures.create');
+    Route::get('/structures/{type?}', [StructureController::class, 'read'])
+        ->name('structures.read');
+    Route::put('/structures/{id?}', [StructureController::class, 'addlevel'])
+        ->name('structures.addlevel');
+    Route::delete('/structures/{id?}', [StructureController::class, 'delete'])
+        ->name('structures.delete');
+});
+
+/* Route du controller AuthController avec JWT  */
+Route::controller(AuthController::class)->group(function () {
+    Route::post('login', 'login');
+    Route::post('register', 'register');
+    Route::post('logout', 'logout');
+    Route::post('refresh', 'refresh');
+
+});
+
