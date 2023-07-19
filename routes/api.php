@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
+use App\Http\Controllers\RessourcesController;
 use App\Http\Controllers\StructureController;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -48,3 +49,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
+
+Route::get('users/ressources', [RessourcesController::class, 'getRessources'])->middleware('auth:api');
+Route::post('users/ressources/produce', [RessourcesController::class, 'produceRessources'])->middleware('auth:api');
