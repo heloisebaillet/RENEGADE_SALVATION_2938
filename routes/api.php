@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
 use App\Http\Controllers\StructureController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,8 @@ Route::middleware('jwt.verify')->group(function () {
     /* Route du système planétaire */
     Route::post('/index', [PlanetarySystemController::class, 'create'])
         ->name('planetary_system.create');
+    Route::put('/index', [PlanetarySystemController::class, 'update'])
+        ->name('planetary_system.update');
 
     /* Routes des infrastructures */
     Route::post('/structures/{type?}', [StructureController::class, 'create'])
