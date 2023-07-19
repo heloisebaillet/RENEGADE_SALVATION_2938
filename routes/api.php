@@ -50,5 +50,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 });
 
+/* Route des Ressources  */
 Route::get('users/ressources', [RessourcesController::class, 'getRessources'])->middleware('auth:api');
 Route::post('users/ressources/produce', [RessourcesController::class, 'produceRessources'])->middleware('auth:api');
