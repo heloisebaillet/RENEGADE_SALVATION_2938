@@ -1,59 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use App\Models\User;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
-    {
-        $email = $request->input('email');
-        $password = $request->input('password');
-
-        // Vérifier les champs d'e-mail et de mot de passe
-        if (empty($email) || empty($password)) {
-            return response()->json(['message' => 'Email and password are required'], 422);
-        }
-
-        // Vérifier les informations d'identification de l'utilisateur dans la base de données
-        $user = DB::table('users')->where('email', $email)->first();
-
-        if ($user && password_verify($password, $user->password)) {
-            // L'authentification réussie
-            return response()->json(['message' => 'Connexion réussie', 'token' => 'your_access_token'], 200);
-        } else {
-            // L'authentification a échoué
-            return response()->json(['message' => 'Identifiants invalides'], 401);
-        }
-    }
-
-    // Dans votre contrôleur d'inscription (RegisterController.php par exemple)
     public function register(Request $request)
     {
         $validate = $request->validate([
-            'first_name' => ['required'],
-            'last_name' => ['required'],
+            'type_user' => ['required'],
+            'firstname' => ['required'],
+            'lastname' => ['required'],
             'email' => ['required', 'email', 'unique:users'],
             'password' => ['required'],
+            'username' => ['required', 'unique:users'],
+            'date_of_birth' => ['required', 'date'],
         ]);
 
-        // Créez un nouvel utilisateur dans la base de données
-        $user = new User();
-        $user->first_name = $request->input('first_name');
-        $user->last_name = $request->input('last_name');
-        $user->email = $request->input('email');
-        $user->password = bcrypt($request->input('password'));
-        $user->save();
+        $user = User::create([
+            'type_user' => $validate['required'],
+            'firstname' => $validate['firstname'],
+            'lastname' => $validate['lastname'],
+            'email' => $validate['email'],
+            'password' => Hash::make($validate['password']),
+            'username' => $validate['username'],
+            'date_of_birth' => $validate['date_of_birth'],
+        ]);
 
-        return response()->json(['message' => 'User registered successfully'], 200);
+        if ($user) {
+            return response()->json(['success' => true], 200);
+        } else {
+            return response()->json(['success' => false], 500);
+        }
     }
-
-    // Dans vos routes (web.php ou api.php)
-
-
 }
