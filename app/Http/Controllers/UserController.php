@@ -8,13 +8,12 @@ class UserController extends Controller
 {
     public function create()
     {
-        return view('create-user');
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'firstName' => 'required',
+            'firstName' => 'required|string',
             'lastName' => 'required',
             'email' => 'required|email',
             'password' => 'required|min:6',
@@ -25,6 +24,8 @@ class UserController extends Controller
         ]);
 
 
-        return redirect('/connection')->with('success', 'Compte créé avec succès !');
+
+
+        return response()->json(['message' => $validatedData], 201);
     }
 }
