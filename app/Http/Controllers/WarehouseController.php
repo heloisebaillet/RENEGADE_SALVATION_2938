@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
-//use Illuminate\Support\Facades\Auth;
-
 class WarehouseController extends Controller
 {
 
@@ -20,7 +18,7 @@ class WarehouseController extends Controller
         $ressources_id = Ressources::class()->type;
         $capacity = '500';
 
-        if ($ressources_id == 'ore' && $ressources_id->ore >= '500') {
+        if ($ressources_id == 'ore' && $ressources_id->ore <= '500') {
             $warehouse = new Warehouse();
             $warehouse->user_id = $user_id;
             $warehouse->type = $ressources_id;
