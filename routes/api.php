@@ -33,7 +33,7 @@ Route::middleware('jwt.verify')->group(function () {
     /* Routes des infrastructures */
     Route::post('/structures/{type?}', [StructureController::class, 'create'])
         ->name('structures.create');
-    Route::get('/structures/{type?}', [StructureController::class, 'read'])
+    Route::get('/structures/', [StructureController::class, 'read'])
         ->name('structures.read');
     Route::put('/structures/{id?}', [StructureController::class, 'addlevel'])
         ->name('structures.addlevel');
