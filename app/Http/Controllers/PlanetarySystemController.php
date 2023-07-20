@@ -44,6 +44,14 @@ class PlanetarySystemController extends Controller
             return Response()->json('Système ' . $planetary_system->name . ' créé !');
         }
     }
+
+    public function read(Request $request)
+    {
+        $user_id = Auth::user()->id;
+        $showsystem = PlanetarySystem::where('user_id', $user_id)->get();
+            return response()->json($showsystem, 200);
+        }
+    }
     // public function store(Request $request, Localisation $localisation, Map $map, XCoord $x_coord, YCoord $y_coord)
     // {
     //     $request->validate([
