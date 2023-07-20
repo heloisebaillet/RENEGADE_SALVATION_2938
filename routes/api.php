@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
 use App\Http\Controllers\StructureController;
+use App\Http\Controllers\WarehouseController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,8 @@ Route::middleware('jwt.verify')->group(function () {
     /* Route du système planétaire */
     Route::post('/index', [PlanetarySystemController::class, 'create'])
         ->name('planetary_system.create');
+    Route::get('/system/', [PlanetarySystemController::class, 'read'])
+        ->name('planetary_system.read');
     Route::put('/index', [PlanetarySystemController::class, 'update'])
         ->name('planetary_system.update');
 
@@ -39,6 +42,14 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('structures.addlevel');
     Route::delete('/structures/{id?}', [StructureController::class, 'delete'])
         ->name('structures.delete');
+
+    /* Routes des entrepôts */
+    Route::post('/warehouses/', [WarehouseController::class, 'create'])
+        ->name('warehouses.create');
+    Route::get('/warehouses/', [WarehouseController::class, 'read'])
+        ->name('warehouses.read');
+    Route::delete('/deletewarehouse/{id?}', [WarehouseController::class, 'delete'])
+        ->name('warehouses.delete');
 });
 
 /* Route du controller AuthController avec JWT  */
