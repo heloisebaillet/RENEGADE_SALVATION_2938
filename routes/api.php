@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
+use App\Models\Battle;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,12 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('warehouses.read');
     Route::delete('/deletewarehouse/{id?}', [WarehouseController::class, 'delete'])
         ->name('warehouses.delete');
+
+    /* Route des battles */
+    Route::post('/battle', [BattleController::class, 'create'])
+        ->name('battle.create');
+    Route::get('/battle/', [BattleController::class, 'read'])
+        ->name('battle.read');
 });
 
 /* Route du controller AuthController avec JWT  */
