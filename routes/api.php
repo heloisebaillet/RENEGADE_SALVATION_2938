@@ -40,6 +40,14 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('structures.addlevel');
     Route::delete('/structures/{id?}', [StructureController::class, 'delete'])
         ->name('structures.delete');
+
+    /* Route des Ressources  */
+    Route::post('ressources/', [RessourcesController::class, 'create'])
+    ->name('ressources.create');
+    Route::get('ressources/', [RessourcesController::class, 'read'])
+    ->name('ressources.read');
+    Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
+    ->name('ressources.update');
 });
 
 /* Route du controller AuthController avec JWT  */
@@ -50,6 +58,3 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 });
 
-/* Route des Ressources  */
-Route::get('users/ressources', [RessourcesController::class, 'getRessources'])->middleware('auth:api');
-Route::post('users/ressources/produce', [RessourcesController::class, 'produceRessources'])->middleware('auth:api');
