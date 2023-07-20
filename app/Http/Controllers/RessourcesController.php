@@ -9,66 +9,68 @@ use Illuminate\Support\Facades\Auth;
 
 class RessourcesController extends Controller
 {
-    public function getRessources()
+    public function create()
     {
-        $userId = Auth::user()->id;
+        $user_id = Auth::user()->id;
+        $verify = Ressources::where('user_id', $user_id)->get();
+        $type = "";
+        $quantity = "";
 
+        // plutôt utiliser where user id
+        // $user = User::findOrFail($userId);
 
-        $user = User::findOrFail($userId);
-        $ressources = [
-            'ore' => $user->ore,
-            'fuel' => $user->fuel,
-            'energy' => $user->energy,
-        ];
+        // $user->ore += 100;
+        // $user->fuel += 100;
+        // $user->save();
 
-        return response()->json($ressources);
-    }
+        if ($verify != "") {
 
-    public function produceRessources()
-    {
-        $userId = Auth::user()->id;
+            if ($type == "ore" || $type == "fuel" || $type == "energy") {
 
-        $user = User::findOrFail($userId);
+                if ($type == "ore") {
+                    $ore = Ressources::find();
+                    $ore->user_id = $user_id;
+                    $ore->type = $type;
+                    $ore->quantity = $quantity;
+                    $ore->save();
 
-        $user->ore += 100;
-        $user->fuel += 100;
-        $user->save();
+                    // return Response()->json( $ore, 201);
+                    return response()->json(['message' => $ore . ' produced successfully!'], 201);
+                }
 
-        return response()->json(['message' => 'Ressources produced successfully']);
-    }
-    public function takeRessources()
-    {
-        if ($type == "mine" || $type == "raffinery" || $type == "powerplant") {
+                if ($type == "fuel") {
+                    $fuel = Ressources::find();
+                    $fuel->user_id = $user_id;
+                    $fuel->type = $type;
+                    $fuel->quantity = $quantity;
+                    $fuel->save();
 
-            if ($type == "mine") {
-                $mine = Ressources::find();
-                $mine->user_id = $user_id;
-                $mine->type = $type;
-                $mine->quantity = $quantity;
-                $mine->save();
+                    // return Response()->json($fuel, 201);
+                    return response()->json(['message' => $fuel . ' produced successfully!'], 201);
+                }
 
-                return Response()->json($mine, 201);
-            }
+                if ($type == "energy") {
+                    $energy = Ressources::find();
+                    $energy->user_id = $user_id;
+                    $energy->type = $type;
+                    $energy->quantity = $quantity;
+                    $energy->save();
 
-            if ($type == "raffinery") {
-                $mine = Ressources::find();
-                $mine->user_id = $user_id;
-                $mine->type = $type;
-                $mine->quantity = $quantity;
-                $mine->save();
-
-                return Response()->json($raffinery, 201);
-            }
-
-            if ($type == "powerplant") {
-                $mine = Ressources::find();
-                $mine->user_id = $user_id;
-                $mine->type = $type;
-                $mine->quantity = $quantity;
-                $mine->save();
-
-                return Response()->json($powerplant, 201);
+                    // return Response()->json($energy, 201);
+                    return response()->json(['message' => $energy . ' produced successfully!'], 201);
+                }
             }
         }
+    }
+    public function read(Request $request)
+    {
+        $user_id = Auth::user()->id;
+        // $user = User::findOrFail($userId);
+        $showressources = Ressources::where('user_id', $user_id)->get();
+        return response()->json($showressources, 201);
+    }
+
+    public function update($type = null)
+    {
     }
 }
