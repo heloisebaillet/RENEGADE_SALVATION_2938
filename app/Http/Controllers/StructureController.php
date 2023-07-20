@@ -13,7 +13,7 @@ class StructureController extends Controller
     public function create(Request $request, $type = null)
     {
         // A modifier, quand le controller User sera créé
-        $user_id = "1";
+        $user_id = Auth::user()->id;
         $level = "1";
         // A vérifier si l'utilisateur a assez d'énergie
         if ($type == "mine" || $type == "raffinery" || $type == "powerplant" || $type == "shipyard") {
@@ -91,7 +91,7 @@ class StructureController extends Controller
     public function addlevel(Request $request, $id)
     {
         // A modifier, quand le controller User sera créé
-        $user_id = "1";
+        $user_id = Auth::user()->id;
         $minerais = 300;
         $type = Structure::where('user_id', $user_id)->where('id', $id)->first();
         if ($type != "") {
@@ -111,7 +111,7 @@ class StructureController extends Controller
     public function delete(Request $request, $id = null)
     {
         // A modifier, quand le controller User sera créé
-        $user_id = "1";
+        $user_id = Auth::user()->id;
         $type = Structure::where('user_id', $user_id)->where('id', $id)->first();
 
         if ($type != "" && $user_id == $type->user_id) {
