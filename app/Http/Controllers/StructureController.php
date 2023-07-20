@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Structure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class StructureController extends Controller
 {
@@ -69,18 +70,22 @@ class StructureController extends Controller
         }
     }
     // lit les batiments de l'utilisateur
-    public function read(Request $request, $type = null)
+    public function read()
     {
         // A modifier, quand le controller User sera créé
-        $user_id = "1";
-        // si le paramètre n'est pas vide, choix du type de batiment
-        if ($type != null) {
-            $choice = Structure::where('user_id', $user_id)->where('type', $type)->get();
-            return response()->json($choice, 200);
-        } else {
-            $all = Structure::where('user_id', $user_id)->get();
-            return response()->json($all, 200);
-        }
+            $user_id = Auth::User()->id;
+            $mine = Structure::where('user_id', $user_id)->where('type', 'mine')->get();
+            $raffinery = Structure::where('user_id', $user_id)->where('type', 'raffinery')->get();
+            $powerplant = Structure::where('user_id', $user_id)->where('type', 'powerplant')->get();
+            $shipyard = Structure::where('user_id', $user_id)->where('type', 'shipyard')->get();
+            $response = [
+                'mine' => $mine,
+                'raffinery' => $raffinery,
+                'powerplant' => $powerplant,
+                'shipyard' => $shipyard
+            ];
+            return response()->json($response, 200);
+        
     }
     // Ajoute level +1 quand les ressources le permette
     public function addlevel(Request $request, $id)
