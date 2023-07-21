@@ -27,12 +27,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.verify')->group(function () {
     /* Route du système planétaire */
-    Route::post('/index', [PlanetarySystemController::class, 'create'])
-        ->name('planetary_system.create');
-    Route::get('/system/', [PlanetarySystemController::class, 'read'])
-        ->name('planetary_system.read');
-    Route::put('/index', [PlanetarySystemController::class, 'update'])
-        ->name('planetary_system.update');
+    Route::post('/index', [PlanetarySystemController::class, 'create'])->name('planetary_system.create');
+    Route::get('/system/', [PlanetarySystemController::class, 'read'])->name('planetary_system.read');
+    Route::put('/index', [PlanetarySystemController::class, 'update'])->name('planetary_system.update');
 
     /* Routes des infrastructures */
     Route::post('/structures/{type?}', [StructureController::class, 'create'])

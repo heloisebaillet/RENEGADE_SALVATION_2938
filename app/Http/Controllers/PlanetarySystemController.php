@@ -12,22 +12,58 @@ class PlanetarySystemController extends Controller
     public function create(Request $request)
     {
         $user_id = Auth::user()->id;
+        // pour le moment : 
         $name = $request->name;
+        // quand name system implanté dans formulaire d'inscription user :
+        //$user_id = Auth::user()->name;
+        $x_coord = random_int(1, 999);
+        $y_coord = random_int(1, 999);
 
-        $planetary_system = new PlanetarySystem();
-        $planetary_system->name = $name;
-        $planetary_system->x_coordinate = random_int(1, 999);
-        $planetary_system->y_coordinate = random_int(1, 999);
-        $planetary_system->save();
+        $verify = PlanetarySystem::where('x_coord', $x_coord)->where('y_coord', $y_coord)->get();
+        if ($verify != "") {
 
-        return response()->json('Système ' . $planetary_system->name . ' créé !');
+            $planetary_system = new PlanetarySystem();
+            $planetary_system->name = $name;
+            $planetary_system->x_coord = $x_coord;
+            $planetary_system->y_coord = $y_coord;
+            $planetary_system->save();
+
+            return response()->json('Système ' . $planetary_system->name . ' créé !');
+        } else {
+            $x_coord = $x_coord = (rand(1, 999));
+            $y_coord = (rand(1, 999));
+
+            $planetary_system = new PlanetarySystem();
+            $planetary_system->name = $request->name;
+            $planetary_system->x_coord = $x_coord;
+            $planetary_system->y_coord = $y_coord;
+            $planetary_system->save();
+
+            return response()->json('Système ' . $planetary_system->name . ' créé !');
+        }
+    }
+
+    public function index(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+        ]);
+
+        $name = $request->input('name');
+
+        PlanetarySystem::create([
+            'name' => $name,
+            'x_coord' => random_int(1, 999),
+            'y_coord' => random_int(1, 999),
+        ]);
+
+        return response()->json(['status' => 'success', 'message' => 'Planetary system name saved successfully']);
     }
 
     public function destroy(PlanetarySystem $planetary_system)
     {
         $planetary_system->delete();
 
-        // à arranger plus tard
-        return redirect()->route('index')->with('success', '✔️ System successfully deleted.');;
+        return redirect()->route('index')->with('success', '✔️ System successfully deleted.');
     }
 }
