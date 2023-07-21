@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlanetarySystem;
+use App\Models\Ressources;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,14 +49,6 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string',
-            'firstname' => 'required|string',
-            'lastname' => 'required|string',
-            'username' => 'required|string',
-            'date_of_birth' => 'required'
-        ]);
 
         $user = User::create([
             'firstname' => $request->firstname,
@@ -62,22 +57,60 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'username' => $request->username,
             'date_of_birth' => $request->date_of_birth,
+            'planetary_system_name' => $request->name
         ]);
+        Auth::login($user);
+        $user_id = Auth::user()->id;
+        // création de la planetary system 
+        $x_coord = random_int(1, 999);
+        $y_coord = random_int(1, 999);
+        $verify = PlanetarySystem::where('x_coord', $x_coord)->where('y_coord', $y_coord)->get();
+        if ($verify != "") {
+            $planetary_system = new PlanetarySystem();
+            $planetary_system->user_id = $user_id;
+            $planetary_system->x_coord = $x_coord;
+            $planetary_system->y_coord = $y_coord;
+            $planetary_system->save();
+        } else {
+            $x_coord = $x_coord = (rand(1, 999));
+            $y_coord = (rand(1, 999));
+            $planetary_system = new PlanetarySystem();
+            $planetary_system->user_id = $user_id;
+            $planetary_system->x_coord = $x_coord;
+            $planetary_system->y_coord = $y_coord;
+            $planetary_system->save();
+        }
+        // Création des deux warehouses
+        $warehouse = new Warehouse();
+        $warehouse->user_id = $user_id;
+        $warehouse->quantity = 2;
+        $warehouse->save();
 
-        $token = Auth::login($user);
+        // Création des ressources offertes
+        $offer1 = new Ressources();
+        $offer1->user_id = $user_id;
+        $offer1->type = "ore";
+        $offer1->quantity = 1000;
+        $offer1->save();
+        $offer2 = new Ressources();
+        $offer2->user_id = $user_id;
+        $offer2->type = "fuel";
+        $offer2->quantity = 1000;
+        $offer2->save();
+        $offer3 = new Ressources();
+        $offer3->user_id = $user_id;
+        $offer3->type = "energy";
+        $offer3->quantity = 20;
+        $offer3->save();
+
         return response()->json([
             'status' => 'success',
-            'message' => 'User created successfully',
-            'user' => $user,
-            'authorisation' => [
-                'token' => $token,
-                'type' => 'bearer',
-            ]
-        ]);
+        ], 201);
     }
 
     public function logout()
-    {   Auth::logout();
+    {
+        Auth::logout();
 
         if (!Auth::check()) {
             return response()->json([

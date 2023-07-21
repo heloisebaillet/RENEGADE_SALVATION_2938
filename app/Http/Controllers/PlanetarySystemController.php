@@ -9,39 +9,39 @@ use Illuminate\Support\Facades\Auth;
 
 class PlanetarySystemController extends Controller
 {
-    public function create(Request $request)
-    {
-        $user_id = Auth::user()->id;
-        // pour le moment : 
-        $name = $request->name;
+    //public function create(Request $request)
+    //{
+    //    $user_id = Auth::user()->id;
+    //    // pour le moment : 
+    //    $name = $request->name;
         // quand name system implanté dans formulaire d'inscription user :
         //$user_id = Auth::user()->name;
-        $x_coord = random_int(1, 999);
-        $y_coord = random_int(1, 999);
+    //    $x_coord = random_int(1, 999);
+    //    $y_coord = random_int(1, 999);
+    //
+    //    $verify = PlanetarySystem::where('x_coord', $x_coord)->where('y_coord', $y_coord)->get();
+    //    if ($verify != "") {
 
-        $verify = PlanetarySystem::where('x_coord', $x_coord)->where('y_coord', $y_coord)->get();
-        if ($verify != "") {
+    //        $planetary_system = new PlanetarySystem();
+    //        $planetary_system->name = $name;
+    //        $planetary_system->x_coord = $x_coord;
+    //        $planetary_system->y_coord = $y_coord;
+    //        $planetary_system->save();
 
-            $planetary_system = new PlanetarySystem();
-            $planetary_system->name = $name;
-            $planetary_system->x_coord = $x_coord;
-            $planetary_system->y_coord = $y_coord;
-            $planetary_system->save();
+    //        return response()->json('Système ' . $planetary_system->name . ' créé !');
+    //    } else {
+    //        $x_coord = $x_coord = (rand(1, 999));
+    //        $y_coord = (rand(1, 999));
 
-            return response()->json('Système ' . $planetary_system->name . ' créé !');
-        } else {
-            $x_coord = $x_coord = (rand(1, 999));
-            $y_coord = (rand(1, 999));
+    //        $planetary_system = new PlanetarySystem();
+    //        $planetary_system->name = $request->name;
+    //        $planetary_system->x_coord = $x_coord;
+    //        $planetary_system->y_coord = $y_coord;
+    //        $planetary_system->save();
 
-            $planetary_system = new PlanetarySystem();
-            $planetary_system->name = $request->name;
-            $planetary_system->x_coord = $x_coord;
-            $planetary_system->y_coord = $y_coord;
-            $planetary_system->save();
-
-            return response()->json('Système ' . $planetary_system->name . ' créé !');
-        }
-    }
+    //        return response()->json('Système ' . $planetary_system->name . ' créé !');
+    //    }
+    //}
 
     public function index(Request $request)
     {

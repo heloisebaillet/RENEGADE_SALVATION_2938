@@ -28,6 +28,7 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'username',
         'date_of_birth',
+        'planetary_system_name'
     ];
 
 

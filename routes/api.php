@@ -28,7 +28,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.verify')->group(function () {
     /* Route du système planétaire */
-    Route::post('/index', [PlanetarySystemController::class, 'create'])->name('planetary_system.create');
+    /* Désactivation de la route create
+    /*Route::post('/index', [PlanetarySystemController::class, 'create'])->name('planetary_system.create'); */
     Route::get('/system/', [PlanetarySystemController::class, 'read'])->name('planetary_system.read');
     Route::put('/index', [PlanetarySystemController::class, 'update'])->name('planetary_system.update');
 
@@ -44,16 +45,19 @@ Route::middleware('jwt.verify')->group(function () {
 
 
     /* Route des Ressources  */
-    Route::post('ressources/', [RessourcesController::class, 'create'])
-    ->name('ressources.create');
+    /* Désactivation de la route create
+    /*Route::post('ressources/', [RessourcesController::class, 'create'])
+    /*->name('ressources.create');
+    */
     Route::get('ressources/', [RessourcesController::class, 'read'])
     ->name('ressources.read');
     Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
     ->name('ressources.update');
 
     /* Routes des entrepôts */
-    Route::post('/warehouses/', [WarehouseController::class, 'create'])
-        ->name('warehouses.create');
+    /* Désactivation de la route create
+    /* Route::post('/warehouses/', [WarehouseController::class, 'create']) 
+     /*   ->name('warehouses.create');*/
     Route::get('/warehouses/', [WarehouseController::class, 'read'])
         ->name('warehouses.read');
     Route::put  ('/warehouses/', [WarehouseController::class, 'update'])
