@@ -251,5 +251,8 @@ class BattleController extends Controller
 
     public function read(Request $request)
     {
+        $user_id = Auth::user()->id;
+        $showbattle = Battle::where('user_id', $user_id)->get();
+        return response()->json($showbattle, 200);
     }
 }
