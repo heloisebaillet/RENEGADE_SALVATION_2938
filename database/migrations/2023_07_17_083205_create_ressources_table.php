@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ressources', function (Blueprint $table) {
-            $table->increments('id')->foreign('warehouses.ressouces_id');
+            $table->increments('id');
             $table->integer('user_id');
             $table->string('type');
             $table->integer('quantity');
