@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 
-class FleetController extends Controller
+class ShipsController extends Controller
 {
 
     public function create(Request $request, $type = null)
@@ -19,7 +19,7 @@ class FleetController extends Controller
 
             if ($type == "fighter") {
                 //$fuel_consumption ="";
-                $fighter = new ships();
+                $fighter = new Ships();
                 $fighter->user_id = $user_id;
                 $fighter->type = $type;
                 $fighter->quantity += 1;
