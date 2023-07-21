@@ -11,29 +11,29 @@ class WarehouseController extends Controller
 {
 
     // création d'un entrepôt si l'utilisateur a suffisamment de minerai (500)
-    public function create()
-    {
-        $user_id = Auth::user()->id;
-        $verify = Warehouse::where('user_id', $user_id)->get();
+    // public function create()
+    // {
+    //     $user_id = Auth::user()->id;
+    //     $verify = Warehouse::where('user_id', $user_id)->get();
 
-        if ($verify != "[]") {
+    //     if ($verify != "[]") {
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized',
-                'data' => $verify,
-            ], 401);
-        } else {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Unauthorized',
+    //             'data' => $verify,
+    //         ], 401);
+    //     } else {
 
-            $warehouse = new Warehouse();
-            $warehouse->user_id = $user_id;
-            $warehouse->quantity = 2;
-            $warehouse->save();
-            return response()->json([
-                'status' => 'success',
-            ], 201);
-        }
-    }
+    //         $warehouse = new Warehouse();
+    //         $warehouse->user_id = $user_id;
+    //         $warehouse->quantity = 2;
+    //         $warehouse->save();
+    //         return response()->json([
+    //             'status' => 'success',
+    //         ], 201);
+    //     }
+    // }
 
     // lecture des détails de l'entrepôts 
     public function read()
