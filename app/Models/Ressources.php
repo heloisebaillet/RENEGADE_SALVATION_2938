@@ -13,4 +13,9 @@ class Ressources extends Model
         'type',
         'quantity'
     ];
+
+    public function battle()
+    {
+        return $this->hasMany(Battle::class, 'planet_id');
+    }
 }

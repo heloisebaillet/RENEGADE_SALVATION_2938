@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Battle;
 use App\Models\Ressources;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -43,11 +44,18 @@ class RessourcesController extends Controller
         }
     }
 
-    public function read(Request $request)
+    public function read()
     {
         $user_id = Auth::user()->id;
-        $showressources = Ressources::where('user_id', $user_id)->get();
-        return response()->json($showressources, 201);
+        $ore = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'ore')->get();
+        $fuel = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'fuel')->get();
+        $energy = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'energy')->get();
+        $response = [
+            'ore' => $ore,
+            'fuel' => $fuel,
+            'energy' => $energy,
+        ];
+        return response()->json($response, 200);
     }
 
     public function update(Request $request, $type, $operation, $qty)
@@ -87,6 +95,27 @@ class RessourcesController extends Controller
                     'message' => ' warehouse empty',
                 ], 400);
             }
+        }
+    }
+    public function transferResources(Battle $battle)
+    {
+        if ($battle->winner_id === $battle->attacker_id) {
+            //calcul des 10%
+            $looserResources = $battle->looserResources; 
+            $resourcesToTransfer = $looserResources->amount * 0.1;
+
+            //mise  à jour des ressources du gagnant
+            $winnerResources = $battle->winnerResources; 
+            $winnerResources->amount += $resourcesToTransfer;
+            $winnerResources->save();
+
+            //mise  à jour des ressources du perdant
+            $looserResources->amount -= $resourcesToTransfer;
+            $looserResources->save();
+
+            //mise  à jour des ressources volées
+            $battle->ressources_looted = $resourcesToTransfer;
+            $battle->save();
         }
     }
 }
