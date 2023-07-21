@@ -102,10 +102,17 @@ class AuthController extends Controller
         $offer3->type = "energy";
         $offer3->quantity = 20;
         $offer3->save();
+        $credentials = $request->only('email', 'password');
 
+        $token = Auth::attempt($credentials);
         return response()->json([
             'status' => 'success',
-        ], 201);
+            'user' => $user,
+            'authorisation' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ]);;
     }
 
     public function logout()
