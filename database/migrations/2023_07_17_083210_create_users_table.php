@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id')->foreign('battle_history.user_id');
-            $table->integer('planetary_system_id')->nullable();
+            $table->string('planetary_system_name', 50)->foreign('planetary_system.user_id');
             $table->string('type_user', 50)->nullable();
             $table->string('firstname', 100);
             $table->string('lastname', 100);
