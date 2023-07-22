@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
+use App\Http\Controllers\RessourcesController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
 use App\Models\Battle;
@@ -27,29 +28,41 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('jwt.verify')->group(function () {
     /* Route du système planétaire */
-    Route::post('/index', [PlanetarySystemController::class, 'create'])
-        ->name('planetary_system.create');
-    Route::get('/system/', [PlanetarySystemController::class, 'read'])
-        ->name('planetary_system.read');
-    Route::put('/index', [PlanetarySystemController::class, 'update'])
-        ->name('planetary_system.update');
+    /* Désactivation de la route create
+    /*Route::post('/index', [PlanetarySystemController::class, 'create'])->name('planetary_system.create'); */
+    Route::get('/system/', [PlanetarySystemController::class, 'read'])->name('planetary_system.read');
+    Route::put('/index', [PlanetarySystemController::class, 'update'])->name('planetary_system.update');
 
     /* Routes des infrastructures */
     Route::post('/structures/{type?}', [StructureController::class, 'create'])
         ->name('structures.create');
-    Route::get('/structures/{type?}', [StructureController::class, 'read'])
+    Route::get('/structures/', [StructureController::class, 'read'])
         ->name('structures.read');
     Route::put('/structures/{id?}', [StructureController::class, 'addlevel'])
         ->name('structures.addlevel');
     Route::delete('/structures/{id?}', [StructureController::class, 'delete'])
         ->name('structures.delete');
 
+
+    /* Route des Ressources  */
+    /* Désactivation de la route create
+    /*Route::post('ressources/', [RessourcesController::class, 'create'])
+    /*->name('ressources.create');
+    */
+    Route::get('ressources/', [RessourcesController::class, 'read'])
+    ->name('ressources.read');
+    Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
+    ->name('ressources.update');
+
     /* Routes des entrepôts */
-    Route::post('/warehouses/', [WarehouseController::class, 'create'])
-        ->name('warehouses.create');
+    /* Désactivation de la route create
+    /* Route::post('/warehouses/', [WarehouseController::class, 'create']) 
+     /*   ->name('warehouses.create');*/
     Route::get('/warehouses/', [WarehouseController::class, 'read'])
         ->name('warehouses.read');
-    Route::delete('/deletewarehouse/{id?}', [WarehouseController::class, 'delete'])
+    Route::put  ('/warehouses/', [WarehouseController::class, 'update'])
+        ->name('warehouses.update');
+    Route::delete('/warehouses/', [WarehouseController::class, 'delete'])
         ->name('warehouses.delete');
 
     /* Route des battles */
@@ -57,6 +70,7 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle/{id?}/', [BattleController::class, 'read'])
         ->name('battle.read');
+
 });
 
 /* Route du controller AuthController avec JWT  */
@@ -66,3 +80,4 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
+

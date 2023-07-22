@@ -11,7 +11,6 @@ class Warehouse extends Model
     protected $table = 'warehouses';
     protected $fillable = [
         'user_id',
-        'ressources_id',
-        'capacity'
+        'quantity',
     ];
 }
