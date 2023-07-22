@@ -13,8 +13,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('planetary_system', function (Blueprint $table) {
-            $table->increments('id')->foreign('users.planetary_system_id');
-            $table->string('name', 50)->unique()->nullable();
+            $table->increments('id');
+            $table->string('user_id', 50)->foreign('users.id');
             $table->integer('x_coord');
             $table->integer('y_coord');
             $table->timestamp('created_at')->useCurrent();
@@ -30,6 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('planetary_system');
     }
 };
-
-
-
