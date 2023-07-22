@@ -100,11 +100,13 @@ class StructureController extends Controller
         $raffinery = Structure::where('user_id', $user_id)->where('type', 'raffinery')->get();
         $powerplant = Structure::where('user_id', $user_id)->where('type', 'powerplant')->get();
         $shipyard = Structure::where('user_id', $user_id)->where('type', 'shipyard')->get();
+        $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
         $response = [
             'mine' => $mine,
             'raffinery' => $raffinery,
             'powerplant' => $powerplant,
-            'shipyard' => $shipyard
+            'shipyard' => $shipyard,
+            'ore' => $ore
         ];
         return response()->json($response, 200);
     }
