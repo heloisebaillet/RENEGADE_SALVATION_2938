@@ -14,163 +14,91 @@ class BattleController extends Controller
 {
     public function create(Request $request)
     {
-        $distance = calculateDistance($x1, $y1, $x2, $y2);
-        $user_id = Auth::user()->id;
-        $attacker_id = Battle::class()->user_id;
-        $defender_id = Battle::class()->user_id;
-        $winner_id = Battle::class()->user_id;
+        $attacker_id = Auth::user()->id;
+        $x1 = PlanetarySystem::where('user_id', $attacker_id)->x_coord;
+        $y1 = PlanetarySystem::where('user_id', $attacker_id)->y_coord;
+        $defender_id = $request->user_id;
+        $x2 = PlanetarySystem::where('user_id', $defender_id)->x_coord;
+        $y2 = PlanetarySystem::where('user_id', $defender_id)->y_coord;
         $resources_looted = Battle::class()->user_id;
-        $ressources = Ressources::class()->type;
-
-        // on créé l'attaque si toutes les conditions recquises sont validées
-        if (hasEnoughFuel($userShips, $targetSystem, $fuelConsumptionRates, $distance, $attacker, $defender, $fuelConsumption)) {
-            $battle = new Battle();
-            $battle->attacker_id = $attacker_id;
-            $battle->defender_id = $defender_id;
-            $battle->winner_id = $winner_id;
-            $battle->resources_looted = $resources_looted;
-            $battle->save();
-            return Response()->json('Attack Launched!');
-        } else {
-            return Response()->json("You don't have enough fuel to launch an attack. Select fewer ships or produce more fuel.");
-        }
+        $fuel = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'fuel')->get();
+        $fighter = Ships::class()->type('fighter');
+        $consoFighter = 1;
+        $frigate = Ships::class()->type('frigate');
+        $consoFrigate = 2;
+        $cruiser = Ships::class()->type('cruiser');
+        $consoCruiser = 4;
+        $destroyer = Ships::class()->type('destroyer');
+        $consoDestroyer = 8;
 
         // calcul de la distance entre le système planétaire de l'attaquant et du défenseur
-        function calculateDistance(&$x1, &$y1, &$x2, &$y2)
-        {
+        function calculateDistance($x1, $y1, $x2, $y2)
+        { // pow: c'est une fonction exponnentielle de calcul
+            // sqrt : fonction racine carré
             return sqrt(pow($x2 - $x1, 2) + pow($y2 - $y1, 2));
         }
 
-        // calcul de la quantité de fuel nécessaire pour parcourir la $distance
-        function calculateFuel($userShips, $fuelConsumptionRates)
-        {
-            $totalFuelRequired = "";
-
-            // on calcule le fuel nécessaire pour chaque type de vaisseau
-            // dont la consommation de fuel diffère pour parcourir 10 cases de la map
-            foreach ($userShips['ships'] as $shipType => $quantity) {
-                if (isset($fuelConsumptionRates[$shipType])) {
-                    $fuelPer10Cases = $fuelConsumptionRates[$shipType];
-                    $fuelRequired = ($quantity / 10) * $fuelPer10Cases;
-                    $totalFuelRequired += $fuelRequired;
-                }
-            }
-            return $totalFuelRequired;
+        if ($fighter) {
+            $fuelNeeded = ((calculateDistance($x1, $y1, $x2, $y2) * $consoFighter) / 10);
+        }
+        if ($frigate) {
+            $fuelNeeded = ((calculateDistance($x1, $y1, $x2, $y2) * $consoFrigate) / 10);
+        }
+        if ($cruiser) {
+            $fuelNeeded = ((calculateDistance($x1, $y1, $x2, $y2) * $consoCruiser) / 10);
+        }
+        if ($destroyer) {
+            $fuelNeeded = ((calculateDistance($x1, $y1, $x2, $y2) * $consoDestroyer) / 10);
+        } else {
+            return Response()->json(['success' => 'false'], 400);
         }
 
-        // on vérifie que le joueur attaquant a le fuel nécessaire pour 
-        // atteindre le système ennemi 
-        function hasEnoughFuel(&$userShips, &$targetSystem, &$fuelConsumptionRates, &$distance, &$attacker, &$defender, &$fuelConsumption)
-        {
-            $userShips = [
-                'x' => $attacker->user_id,
-                'y' => $attacker->user_id,
-                'ships' => ['fighter' => Ships::class()->type, 'frigate' => Ships::class()->type, 'cruiser' => Ships::class()->type, 'destroyer' => Ships::class()->type], 'fuel' => Ressources::class()->type
-            ];
+        $fuelConsumed = ($fuel - $fuelNeeded);
 
-            $targetSystem = [
-                'x' => $defender->user_id,
-                'y' => $defender->user_id,
-            ];
-
-            $fuelConsumptionRates = ['fighter' => 1, 'frigate' => 2, 'cruiser' => 4, 'destroyer' => 8];
-            $distance = calculateDistance($userShips['x'], $userShips['y'], $targetSystem['x'], $targetSystem['y']);
-            $attacker = Battle::class()->user_id;
-            $defender = PlanetarySystem::class()->user_id;
-            $totalFuelRequired = "";
-            $fuelConsumption = calculateFuel($userShips, $fuelConsumptionRates);
-
-            foreach ($userShips['ships'] as $shipType => $quantity) {
-                if (isset($fuelConsumptionRates[$shipType])) {
-                    $fuelPer10Cases = $fuelConsumptionRates[$shipType];
-                    $fuelRequired = ($quantity / 10) * $fuelPer10Cases;
-                    $totalFuelRequired += $fuelRequired;
-                }
-
-                $userFuel = $userShips['fuel'];
-
-                if ($userFuel >= $totalFuelRequired) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
+        // mise à jour du fuel post travel
+        $fuel->quantity =  $fuel->quantity - $fuelConsumed;
+        $fuel->save();
 
         // on lance une boucle des rounds pour déterminer les points d'attaques qui infligent 
         // des dégâts sur les points de défense des flottes 
-        function battleRounds(&$userShips, &$enemyShips, &$attackPoints, &$defensePoints)
+        function battleRounds($battleShips, $attackPoints, $defensePoints, $damage)
         {
-            $userDamage = "";
-            $enemyDamage = "";
-            $attackPoints = "";
-            $defensePoints = "";
+            // on indique les points d'attaque et de défense des vaisseaux
+            $battleShips = [
+                ['type' => 'fighter'],
+                ['type' => 'frigate'],
+                ['type' => 'cruiser'],
+                ['type' => 'destroyer']
+            ];
+
+            $attackPoints = [
+                ['attackPoints' => 7],
+                ['attackPoints' => 13],
+                ['attackPoints' => 14],
+                ['attackPoints' => 27]
+            ];
+
+            $defensePoints = [
+                ['defensePoints' => 11],
+                ['defensePoints' => 5],
+                ['defensePoints' => 9],
+                ['defensePoints' => 20]
+            ];
+
+            //$damage = ;
+            // Pour chaque type vaisseau attaquant, on calcule le nombre de points d'attaque en faisant :
+            //nombre de vaisseaux x points d'attaque du vaisseau x facteur de chance (aléatoire entre 0.5 et 1.5)
+            //$defense =;
+            //Pour chaque type vaisseau défenseur, on calcule le nombre de points de défense en faisant :
+            //nombre de vaisseaux x points de défense du vaisseau x facteur de chance (aléatoire entre 0.5 et 1.5)
 
             while (true) {
-
-                // on demande à ce que les vaisseaux les plus faibles soient visés en premier
-                usort($userShips, function ($a, $b) {
-                    return $a['defensePoints'] - $b['defensePoints'];
-                });
-                usort($enemyShips, function ($a, $b) {
-                    return $a['defensePoints'] - $b['defensePoints'];
-                });
-
-                // on indique les points d'attaque et de défense des vaisseaux de l'attaquant
-                $userShips = [
-                    ['type' => 'fighter', 'attackPoints' => 7, 'defensePoints' => 11],
-                    ['type' => 'frigate', 'attackPoints' => 13, 'defensePoints' => 5],
-                    ['type' => 'cruiser', 'attackPoints' => 14, 'defensePoints' => 9],
-                    ['type' => 'destroyer', 'attackPoints' => 27, 'defensePoints' => 20]
-                ];
-
-                // foreach ($userShips['ships'] as $shipType => $quantity) {
-
-                //     if ($shipType === 'fighter') {
-                //         $attackPoints = 7;
-                //         $defensePoints = 11;
-                //     } elseif ($shipType === 'frigate') {
-                //         $attackPoints = 13;
-                //         $defensePoints = 5;
-                //     } elseif ($shipType === 'cruiser') {
-                //         $attackPoints = 14;
-                //         $defensePoints = 9;
-                //     } elseif ($shipType === 'destroyer') {
-                //         $attackPoints = 27;
-                //         $defensePoints = 20;
-                //     }
-                // }
-
-                // on indique les points d'attaque et de défense des vaisseaux du défenseur
-                $enemyShips = [
-                    ['type' => 'fighter', 'attackPoints' => 7, 'defensePoints' => 11],
-                    ['type' => 'frigate', 'attackPoints' => 13, 'defensePoints' => 5],
-                    ['type' => 'cruiser', 'attackPoints' => 14, 'defensePoints' => 9],
-                    ['type' => 'destroyer', 'attackPoints' => 27, 'defensePoints' => 20]
-                ];
-
-                // foreach ($enemyShips['ships'] as $shipType => $quantity) {
-                //     if ($shipType === 'fighter') {
-                //         $attackPoints = 7;
-                //         $defensePoints = 11;
-                //     } elseif ($shipType === 'frigate') {
-                //         $attackPoints = 13;
-                //         $defensePoints = 5;
-                //     } elseif ($shipType === 'cruiser') {
-                //         $attackPoints = 14;
-                //         $defensePoints = 9;
-                //     } elseif ($shipType === 'destroyer') {
-                //         $attackPoints = 27;
-                //         $defensePoints = 20;
-                //     }
-                // }
-
                 // on lance une boucle pour attaquer jusqu'à ce qu'une des deux
                 // flottes ait la défense de tous ses vaisseaux à 0
-                $roundDamageUser = '';
-                $roundDamageEnemy = '';
+                $roundDamageAttacker = '';
+                $roundDamageDefender = '';
 
-                foreach ($userShips as &$ship) {
+                foreach ($battleShips as &$ship) {
 
                     // $quantity = $ship['quantity'];
                     $damage = $ship['attackPoints'];
@@ -245,11 +173,21 @@ class BattleController extends Controller
                 // It's a draw
             }
         }
-        $resourcesController = new RessourcesController();
-        $resourcesController->transferResources($battle);
+
+        // on créé l'attaque si toutes les conditions recquises sont validées
+        if ($fuelNeeded >= $fuel) {
+            $battle = new Battle();
+            $battle->attacker_id = $attacker_id;
+            $battle->defender_id = $defender_id;
+            $battle->winner_id = $winner_id;
+            $battle->resources_looted = $resources_looted;
+            $battle->save();
+            $resourcesController = new RessourcesController();
+            $resourcesController->transferResources($battle);
+        }
     }
 
-    public function read(Request $request)
+    public function read()
     {
         $user_id = Auth::user()->id;
         $showbattle = Battle::where('user_id', $user_id)->get();
