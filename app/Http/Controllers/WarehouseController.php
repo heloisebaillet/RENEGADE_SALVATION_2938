@@ -15,7 +15,6 @@ class WarehouseController extends Controller
     // {
     //     $user_id = Auth::user()->id;
     //     $verify = Warehouse::where('user_id', $user_id)->get();
-
     //     if ($verify != "[]") {
 
     //         return response()->json([
