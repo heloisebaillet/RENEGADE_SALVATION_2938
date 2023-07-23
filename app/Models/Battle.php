@@ -14,4 +14,14 @@ class Battle extends Model
         'winner_id',
         'ressources_looted'
     ];
+
+    public function winnerResources()
+    {
+        return $this->belongsTo(Resource::class, 'winner_id', 'planet_id');
+    }
+
+    public function loserResources()
+    {
+        return $this->belongsTo(Resource::class, 'loser_id', 'planet_id');
+    }
 }

@@ -47,13 +47,13 @@ class RessourcesController extends Controller
     public function read()
     {
         $user_id = Auth::user()->id;
-        $ore = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'ore')->get();
-        $fuel = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'fuel')->get();
-        $energy = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'energy')->get();
+        $ore = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'ore')->first();
+        $fuel = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'fuel')->first();
+        $energy = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'energy')->first();
         $response = [
-            'ore' => $ore,
-            'fuel' => $fuel,
-            'energy' => $energy,
+            'ore' => $ore->quantity,
+            'fuel' => $fuel->quantity,
+            'energy' => $energy->quantity,
         ];
         return response()->json($response, 200);
     }
