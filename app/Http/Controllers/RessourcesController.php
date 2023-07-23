@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Battle;
 use App\Models\Ressources;
+use App\Models\Structure;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RessourcesController extends Controller
 {
@@ -45,15 +48,35 @@ class RessourcesController extends Controller
     // }
 
     public function read()
-    {
+    { //Lecture de des Buildings 
         $user_id = Auth::user()->id;
-        $ore = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'ore')->first();
+        $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
         $fuel = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'fuel')->first();
         $energy = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'energy')->first();
+        $today = date("Y-m-d H:i:s");
+        // Partie calcul de la production de ressources, avant envoi sur la partie front
+        // whereRaw permet de faire une requete SQl avec des éléments propre à SQL
+        $mines = Structure::select('id', 'user_id', 'type', 'level', 'energy_consumption', 'created_at', 'updated_at')
+            ->whereRaw('DATE_ADD(created_at, INTERVAL 1 HOUR) < NOW()')
+            ->where('type', 'mine')
+            ->get();
+
+        $calcul_ore = $ore->quantity; 
+        // calcul du nombre d'heure de production des mines
+        foreach ($mines as $mine) {
+            $updated_at = Carbon::parse($mine->updated_at);
+            $hours_difference = $updated_at->diffInHours(Carbon::parse($today));
+            $calcul_ore =  $calcul_ore +  ($hours_difference * 100);
+            $mine->updated_at = $today;
+            $mine->save();
+        }
+        $ore->quantity = $calcul_ore;
+        $ore->save();
         $response = [
             'ore' => $ore->quantity,
             'fuel' => $fuel->quantity,
             'energy' => $energy->quantity,
+
         ];
         return response()->json($response, 200);
     }
@@ -101,11 +124,11 @@ class RessourcesController extends Controller
     {
         if ($battle->winner_id === $battle->attacker_id) {
             //calcul des 10%
-            $looserResources = $battle->looserResources; 
+            $looserResources = $battle->looserResources;
             $resourcesToTransfer = $looserResources->amount * 0.1;
 
             //mise  à jour des ressources du gagnant
-            $winnerResources = $battle->winnerResources; 
+            $winnerResources = $battle->winnerResources;
             $winnerResources->amount += $resourcesToTransfer;
             $winnerResources->save();
 
