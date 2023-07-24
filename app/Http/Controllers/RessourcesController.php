@@ -51,7 +51,7 @@ class RessourcesController extends Controller
     { //Lecture de des Buildings 
         $user_id = Auth::user()->id;
         $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
-        $fuel = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'fuel')->first();
+        $fuel = Ressources::where('user_id', $user_id)->where('type', 'fuel')->first();
         $energy = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'energy')->first();
         $today = date("Y-m-d H:i:s");
         // Partie calcul de la production de ressources, avant envoi sur la partie front
@@ -61,8 +61,16 @@ class RessourcesController extends Controller
             ->where('type', 'mine')
             ->get();
 
-        $calcul_ore = $ore->quantity; 
+        $calcul_ore = $ore->quantity;
+        $raffinerys = Structure::select('id', 'user_id', 'type', 'level', 'energy_consumption', 'created_at', 'updated_at')
+            ->whereRaw('DATE_ADD(created_at, INTERVAL 1 HOUR) < NOW()')
+            ->where('type', 'raffinery')
+            ->get();
+
+        $calcul_fuel = $fuel->quantity;
+
         // calcul du nombre d'heure de production des mines
+        // calcul des ressources par rapport à Updated_at, et Date du jour.
         foreach ($mines as $mine) {
             $updated_at = Carbon::parse($mine->updated_at);
             $hours_difference = $updated_at->diffInHours(Carbon::parse($today));
@@ -72,6 +80,18 @@ class RessourcesController extends Controller
         }
         $ore->quantity = $calcul_ore;
         $ore->save();
+        // calcul du nombre d'heure de production des raffineries
+        // calcul des ressources par rapport à Updated_at, et Date du jour.
+        foreach ($raffinerys as $raffinery) {
+            $updated_at = Carbon::parse($raffinery->updated_at);
+            $hours_difference = $updated_at->diffInHours(Carbon::parse($today));
+            $calcul_fuel =  $calcul_fuel +  ($hours_difference * 100);
+            $raffinery->updated_at = $today;
+            $raffinery->save();
+        }
+        $fuel->quantity = $calcul_fuel;
+        $fuel->save();
+
         $response = [
             'ore' => $ore->quantity,
             'fuel' => $fuel->quantity,
