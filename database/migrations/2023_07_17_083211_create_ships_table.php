@@ -14,7 +14,6 @@ return new class extends Migration
     {
         Schema::create('ships', function (Blueprint $table) {
             $table->increments('id')->foreign('battles.ships_id');
-            $table->integer('structure_id');
             $table->integer('user_id');
             $table->string('type', 100);
             $table->integer('quantity');
