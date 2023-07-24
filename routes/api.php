@@ -65,7 +65,7 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('warehouses.delete');
 
     /* Route des battles */
-    Route::post('/battle/{id?}', [BattleController::class, 'create'])
+    Route::put('/battle/{id?}', [BattleController::class, 'create'])
         ->name('battle.create');
     Route::get('/battle/{id?}/', [BattleController::class, 'read'])
         ->name('battle.read');
