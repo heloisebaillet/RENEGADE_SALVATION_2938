@@ -52,6 +52,15 @@ class RessourcesController extends Controller
         $user_id = Auth::user()->id;
         $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
         $fuel = Ressources::where('user_id', $user_id)->where('type', 'fuel')->first();
+        //calcul de la capacité de stockage
+        $showwarehouse = Warehouse::select('quantity')->where('user_id', $user_id)->first();
+        $capacity = ($showwarehouse->quantity * 500);
+        $calcul_ore = $ore->quantity;
+        $calcul_fuel = $fuel->quantity;
+        $ressources_ore = ($calcul_ore == null ? 0 : $calcul_ore);
+        $capacity_rest_ore = $capacity - $ressources_ore;
+        $ressources_fuel = ($calcul_fuel == null ? 0 : $calcul_fuel);
+        $capacity_rest_fuel = $capacity - $ressources_fuel;
         $energy = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'energy')->first();
         $today = date("Y-m-d H:i:s");
         // Partie calcul de la production de ressources, avant envoi sur la partie front
@@ -60,15 +69,10 @@ class RessourcesController extends Controller
             ->whereRaw('DATE_ADD(created_at, INTERVAL 1 HOUR) < NOW()')
             ->where('type', 'mine')
             ->get();
-
-        $calcul_ore = $ore->quantity;
         $raffinerys = Structure::select('id', 'user_id', 'type', 'level', 'energy_consumption', 'created_at', 'updated_at')
             ->whereRaw('DATE_ADD(created_at, INTERVAL 1 HOUR) < NOW()')
             ->where('type', 'raffinery')
             ->get();
-
-        $calcul_fuel = $fuel->quantity;
-
         // calcul du nombre d'heure de production des mines
         // calcul des ressources par rapport à Updated_at, et Date du jour.
         foreach ($mines as $mine) {
@@ -78,8 +82,15 @@ class RessourcesController extends Controller
             $mine->updated_at = $today;
             $mine->save();
         }
-        $ore->quantity = $calcul_ore;
-        $ore->save();
+        //permet de limiter les ressources de minerais par rapport aux nombres de warehouse 
+        $total_rest_ore = $capacity_rest_ore - $calcul_ore;
+        if ($total_rest_ore >= 0) {
+            $ore->quantity = $calcul_ore;
+            $ore->save();
+        } else if ($total_rest_ore >= 0) {
+            $ore->quantity = $capacity;
+            $ore->save();
+        }
         // calcul du nombre d'heure de production des raffineries
         // calcul des ressources par rapport à Updated_at, et Date du jour.
         foreach ($raffinerys as $raffinery) {
@@ -89,9 +100,15 @@ class RessourcesController extends Controller
             $raffinery->updated_at = $today;
             $raffinery->save();
         }
-        $fuel->quantity = $calcul_fuel;
-        $fuel->save();
-
+        //permet de limiter les ressources de minerais par rapport aux nombres de warehouse 
+        $total_rest_fuel = $capacity_rest_fuel - $calcul_fuel;
+        if ($total_rest_fuel >= 0) {
+            $fuel->quantity = $calcul_fuel;
+            $fuel->save();
+        } else if ($total_rest_fuel >= 0) {
+            $fuel->quantity = $capacity;
+            $fuel->save();
+        }
         $response = [
             'ore' => $ore->quantity,
             'fuel' => $fuel->quantity,
@@ -106,6 +123,7 @@ class RessourcesController extends Controller
         $user_id = Auth::user()->id;
         $showwarehouse = Warehouse::select('quantity')->where('user_id', $user_id)->first();
         $showressources = Ressources::select('quantity')->where('user_id', $user_id)->where('type', $type)->first();
+        //calcul de la capacité de stockage
         $capacity = ($showwarehouse->quantity * 500);
         $ressources = ($showressources == null ? 0 : $showressources->quantity);
         $capacity_rest = $capacity - $ressources;
@@ -151,7 +169,6 @@ class RessourcesController extends Controller
             $winnerResources = $battle->winnerResources;
             $winnerResources->amount += $resourcesToTransfer;
             $winnerResources->save();
-
             //mise  à jour des ressources du perdant
             $looserResources->amount -= $resourcesToTransfer;
             $looserResources->save();
