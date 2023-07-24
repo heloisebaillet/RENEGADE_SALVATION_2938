@@ -25,6 +25,7 @@ class BattleController extends Controller
         $ttl_att_pts = "";
         $ttl_def_pts = "";
         $fuel = Ressources::select('quantity')->where('user_id', $attacker_id)->where('type', 'fuel')->get();
+        $ships = Ships::where('quantity')->get();
         $fighter = Ships::where('type', 'fighter')->get();
         $consoFighter = 1;
         $frigate = Ships::where('type', 'frigate')->get();
@@ -33,6 +34,7 @@ class BattleController extends Controller
         $consoCruiser = 4;
         $destroyer = Ships::where('type', 'destroyer')->get();
         $consoDestroyer = 8;
+        $gameOver = Ships::where('quantity', '0')->get();
 
         // calcul de la distance entre le système planétaire de l'attaquant et du défenseur
         function calculateDistance($x1, $y1, $x2, $y2)
@@ -62,8 +64,7 @@ class BattleController extends Controller
         $fuel->quantity = $fuelConsumed;
         $fuel->save();
 
-        // on lance une boucle des rounds pour déterminer les points d'attaques qui infligent 
-        // des dégâts sur les points de défense des flottes 
+        // on lance une boucle des rounds 
         function battleRounds($fighter, $frigate, $cruiser, $destroyer, $damage, &$shields, $attacker_id, $defender_id, $attackerDamage, $defenderDamage)
         {
             $shipsAttacker = Ships::where('user_id', $attacker_id)->get();
@@ -71,33 +72,37 @@ class BattleController extends Controller
 
             // on calcule les points d'attaque de tous les vaisseaux par type et par round
             if ($fighter && $shipsAttacker && $shipsDefender) {
-                // 11 = points d'attaque déterminé à l'avance par nos soins
+                // 11 = points d'attaque déterminés à l'avance par nos soins
                 $damage = ($fighter->quantity * (11 * rand(0.5, 1.5)));
             }
             if ($frigate && $shipsAttacker && $shipsDefender) {
-                // 13 = points d'attaque déterminé à l'avance par nos soins
+                // 13 = points d'attaque déterminés à l'avance par nos soins
                 $damage = ($frigate->quantity * (13 * rand(0.5, 1.5)));
             }
             if ($cruiser && $shipsAttacker && $shipsDefender) {
-                // 14 = points d'attaque déterminé à l'avance par nos soins
+                // 14 = points d'attaque déterminés à l'avance par nos soins
                 $damage = ($cruiser->quantity * (14 * rand(0.5, 1.5)));
             }
             if ($destroyer && $shipsAttacker && $shipsDefender) {
-                // 27 = points d'attaque déterminé à l'avance par nos soins
+                // 27 = points d'attaque déterminés à l'avance par nos soins
                 $damage = ($destroyer->quantity * (27 * rand(0.5, 1.5)));
             }
 
             // on calcule les points de défense de tous les vaisseaux par type et par round
             if ($fighter && $shipsAttacker && $shipsDefender) {
+                // 7 = points de défense déterminés à l'avance par nos soins
                 $shields = ($fighter->quantity * (7 * rand(0.5, 1.5)));
             }
             if ($frigate && $shipsAttacker && $shipsDefender) {
+                // 5 = points de défense déterminés à l'avance par nos soins
                 $shields = ($frigate->quantity * (5 * rand(0.5, 1.5)));
             }
             if ($cruiser && $shipsAttacker && $shipsDefender) {
+                // 9 = points de défense déterminés à l'avance par nos soins
                 $shields = ($cruiser->quantity * (9 * rand(0.5, 1.5)));
             }
             if ($destroyer && $shipsAttacker && $shipsDefender) {
+                // 20 = points de défense déterminés à l'avance par nos soins
                 $shields = ($destroyer->quantity * (20 * rand(0.5, 1.5)));
             }
 
