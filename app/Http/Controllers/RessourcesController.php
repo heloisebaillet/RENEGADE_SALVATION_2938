@@ -84,10 +84,10 @@ class RessourcesController extends Controller
         }
         //permet de limiter les ressources de minerais par rapport aux nombres de warehouse 
         $total_rest_ore = $capacity_rest_ore - $calcul_ore;
-        if ($total_rest_ore >= 0) {
+        if ($total_rest_ore > 0) {
             $ore->quantity = $calcul_ore;
             $ore->save();
-        } else if ($total_rest_ore >= 0) {
+        } else if ($total_rest_ore <= 0) {
             $ore->quantity = $capacity;
             $ore->save();
         }
@@ -102,10 +102,10 @@ class RessourcesController extends Controller
         }
         //permet de limiter les ressources de minerais par rapport aux nombres de warehouse 
         $total_rest_fuel = $capacity_rest_fuel - $calcul_fuel;
-        if ($total_rest_fuel >= 0) {
+        if ($total_rest_fuel > 0) {
             $fuel->quantity = $calcul_fuel;
             $fuel->save();
-        } else if ($total_rest_fuel >= 0) {
+        } else if ($total_rest_fuel <= 0) {
             $fuel->quantity = $capacity;
             $fuel->save();
         }
