@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Ressources;
 use App\Models\Ship;
 use App\Models\Structure;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ShipsController extends Controller
 {
+
 
     public function Read()
     {
