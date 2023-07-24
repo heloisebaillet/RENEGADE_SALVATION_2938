@@ -21,7 +21,9 @@ class BattleController extends Controller
         $x2 = PlanetarySystem::select('x_coord')->where('user_id', $defender_id)->get();
         $y2 = PlanetarySystem::select('y_coord')->where('user_id', $defender_id)->get();
         // $winner_id = $request->user_id;
-        // $resources_looted = Battle::where('user_id', $attacker_id)->get();
+        $resources_looted = Battle::where('user_id', $attacker_id)->get();
+        $ttl_att_pts = "";
+        $ttl_def_pts = "";
         $fuel = Ressources::select('quantity')->where('user_id', $attacker_id)->where('type', 'fuel')->get();
         $fighter = Ships::where('type', 'fighter')->get();
         $consoFighter = 1;
@@ -164,7 +166,7 @@ class BattleController extends Controller
             });
 
             if (empty($attackerRemainingShips) || empty($defenderRemainingShips)) {
-                break;
+                dump(die);
             }
 
 
@@ -192,7 +194,8 @@ class BattleController extends Controller
             $battle = new Battle();
             $battle->attacker_id = $attacker_id;
             $battle->defender_id = $defender_id;
-            $battle->winner_id = $winner_id;
+            $battle->ttl_att_pts = $ttl_att_pts;
+            $battle->ttl_def_pts = $ttl_def_pts;
             $battle->resources_looted = $resources_looted;
             $battle->save();
             $resourcesController = new RessourcesController();
