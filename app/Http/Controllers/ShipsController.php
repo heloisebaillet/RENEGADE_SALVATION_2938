@@ -3,8 +3,10 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Ressources;
 use App\Models\Ships;
+
 use App\Models\Structure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ShipsController extends Controller
 {
+
 
     public function Read()
     {

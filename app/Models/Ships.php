@@ -15,3 +15,4 @@ class Ships extends Model
         'user_id'
     ];
 }
+

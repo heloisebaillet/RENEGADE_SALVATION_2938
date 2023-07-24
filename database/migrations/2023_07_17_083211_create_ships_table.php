@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer('user_id');
             $table->string('type', 100);
             $table->integer('quantity');
+            $table->integer('attacker_id');
+            $table->integer('defender_id');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

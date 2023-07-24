@@ -13,11 +13,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('battles', function (Blueprint $table) {
-            $table->increments('id')->foreign('battle_history.battle_id');
-            $table->integer('ships_id');
             $table->integer('attacker_id');
             $table->integer('defender_id');
-            $table->integer('winner_id');
+            $table->integer('ttl_att_pts');
+            $table->integer('ttl_def_pts');
             $table->integer('resources_looted');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

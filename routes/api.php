@@ -6,8 +6,7 @@ use App\Http\Controllers\RessourcesController;
 use App\Http\Controllers\ShipsController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
-use App\Models\Battle;
-use App\Models\User;
+use App\Http\Controllers\BattleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -76,6 +75,7 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle/{id?}/', [BattleController::class, 'read'])
         ->name('battle.read');
+
 
     /*Route update user dans la partie protegée*/
     Route::put('/user/', [AuthController::class, 'update'])
