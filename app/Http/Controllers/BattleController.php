@@ -17,15 +17,18 @@ class BattleController extends Controller
         $attacker_id = Auth::user()->id;
         $x1 = PlanetarySystem::select('x_coord')->where('user_id', $attacker_id)->get();
         $y1 = PlanetarySystem::select('y_coord')->where('user_id', $attacker_id)->get();
+
         $defender_id = $request->user_id;
         $x2 = PlanetarySystem::select('x_coord')->where('user_id', $defender_id)->get();
         $y2 = PlanetarySystem::select('y_coord')->where('user_id', $defender_id)->get();
+
         // $winner_id = $request->user_id;
         $resources_looted = Battle::where('user_id', $attacker_id)->get();
         $ttl_att_pts = "";
         $ttl_def_pts = "";
+
         $fuel = Ressources::select('quantity')->where('user_id', $attacker_id)->where('type', 'fuel')->get();
-        $ships = Ships::where('quantity')->get();
+
         $fighter = Ships::where('type', 'fighter')->get();
         $consoFighter = 1;
         $frigate = Ships::where('type', 'frigate')->get();
@@ -34,11 +37,11 @@ class BattleController extends Controller
         $consoCruiser = 4;
         $destroyer = Ships::where('type', 'destroyer')->get();
         $consoDestroyer = 8;
-        $gameOver = Ships::where('quantity', '0')->get();
+
 
         // calcul de la distance entre le système planétaire de l'attaquant et du défenseur
         function calculateDistance($x1, $y1, $x2, $y2)
-        { // pow: c'est une fonction exponnentielle de calcul
+        {   // pow: c'est une fonction exponnentielle de calcul
             // sqrt : fonction racine carré
             return sqrt(pow($x2 - $x1, 2) + pow($y2 - $y1, 2));
         }
@@ -67,8 +70,13 @@ class BattleController extends Controller
         // on lance une boucle des rounds 
         function battleRounds($fighter, $frigate, $cruiser, $destroyer, $damage, &$shields, $attacker_id, $defender_id, $attackerDamage, $defenderDamage)
         {
+            // $gameOver = Ships::where('quantity', '0')->get();
+
             $shipsAttacker = Ships::where('user_id', $attacker_id)->get();
             $shipsDefender = Ships::where('user_id', $defender_id)->get();
+            $ships = Ships::where('quantity')->get();
+            $attacker_id = Ships::where('attacker_id')->get();
+            $defender_id = Ships::where('defender_id')->get();
 
             // on calcule les points d'attaque de tous les vaisseaux par type et par round
             if ($fighter && $shipsAttacker && $shipsDefender) {
@@ -106,93 +114,116 @@ class BattleController extends Controller
                 $shields = ($destroyer->quantity * (20 * rand(0.5, 1.5)));
             }
 
+            //Perte de 30% de ses vaisseaux au joueur perdant du round
+            if ($fighter <= 0) {
+                return $fighter->quantity = $ships * 0.7;
+            }
+            if ($fighter <= 0 && $frigate <= 0) {
+                return $frigate->quantity = $ships * 0.7;
+            }
+            if ($fighter <= 0 && $frigate <= 0 && $cruiser <= 0) {
+                return $cruiser->quantity = $ships * 0.7;
+            }
+            if ($fighter <= 0 && $frigate <= 0 && $cruiser <= 0 && $destroyer <= 0) {
+                return $fighter->quantity = $ships * 0.7;
+            }
+
             // on lance une boucle pour attaquer jusqu'à ce qu'une des deux
             // flottes ait la défense de tous ses vaisseaux à 0
 
-            $roundDamageAttacker = 0;
-            $roundDamageDefender = 0;
+            // $roundWinner = $damage < $shields;
+            // $roundLoser = $shields < $damage;
 
-            foreach ($shipsAttacker as $shipsAtt) {
+            // foreach ($shipsAttacker as $shipsAtt) {
 
-                $damage = $shipsAtt['attackPoints'];
+            //     $damage = $shipsAtt['attackPoints'];
 
-                foreach ($shipsDefender as $shipsDef) {
+            //     foreach ($shipsDefender as $shipsDef) {
 
-                    if ($damage <= 0) break;
+            //         if ($damage <= 0) break;
 
-                    $shields = $shipsDef['defensePoints'];
+            //         $shields = $shipsDef['defensePoints'];
 
-                    if ($damage >= $shields) {
+            //         if ($damage >= $shields) {
 
-                        $roundDamageAttacker += $shields;
-                        $damage -= $shields;
-                        $shields = 0;
-                    } else {
+            //             $roundDamageAttacker += $shields;
+            //             $damage -= $shields;
+            //             $shields = 0;
+            //         } else {
 
-                        $roundDamageAttacker += $damage;
-                        $shields -= $damage;
-                        $damage = 0;
-                    }
-                }
-            }
+            //             $roundDamageAttacker += $damage;
+            //             $shields -= $damage;
+            //             $damage = 0;
+            //         }
+            //     }
+            // }
 
-            foreach ($shipsDefender as $shipsDef) {
+            // foreach ($shipsDefender as $shipsDef) {
 
-                $damage = $shipsDef['attackPoints'];
+            //     $damage = $shipsDef['attackPoints'];
 
-                foreach ($shipsAttacker as $shipsAtt) {
+            //     foreach ($shipsAttacker as $shipsAtt) {
 
-                    if ($damage <= 0) break;
+            //         if ($damage <= 0) break;
 
-                    $shields = $shipsAtt['defensePoints'];
+            //         $shields = $shipsAtt['defensePoints'];
 
-                    if ($damage >= $shields) {
+            //         if ($damage >= $shields) {
 
-                        $roundDamageDefender += $shields;
-                        $damage -= $shields;
-                        $shields = 0;
-                    } else {
+            //             $roundDamageDefender += $shields;
+            //             $damage -= $shields;
+            //             $shields = 0;
+            //         } else {
 
-                        $roundDamageDefender += $damage;
-                        $shields -= $damage;
-                        $damage = 0;
-                    }
-                }
-            }
-
-            $attackerDamage += $roundDamageAttacker;
-            $defenderDamage += $roundDamageDefender;
-
-            $attackerRemainingShips = array_filter($shipsAttacker, function ($ship) {
-                return $ship['defensePoints'] > 0;
-            });
-            $defenderRemainingShips = array_filter($shipsDefender, function ($ship) {
-                return $ship['defensePoints'] > 0;
-            });
-
-            if (empty($attackerRemainingShips) || empty($defenderRemainingShips)) {
-                dump(die);
-            }
+            //             $roundDamageDefender += $damage;
+            //             $shields -= $damage;
+            //             $damage = 0;
+            //         }
+            //     }
+            // }
 
 
-            if ($attackerDamage > $defenderDamage) {
-                return Response()->json('You win!');
-            } elseif ($attackerDamage < $defenderDamage) {
-                return Response()->json('You lose!');
-            } else {
-                return Response()->json("It's a draw!");
-            }
 
-            $winner = battleRounds($fighter, $frigate, $cruiser, $destroyer, $damage, $shields, $attacker_id, $defender_id, $attackerDamage, $defenderDamage);
+            // $attackerDamage += $roundDamageAttacker;
+            // $defenderDamage += $roundDamageDefender;
 
-            if ($winner === 'attacker') {
-                return Response()->json('You win!');
-            } elseif ($winner === 'defender') {
-                return Response()->json('You lose!');
-            } else {
-                return Response()->json("It's a draw!");
+            // $attackerRemainingShips = array_filter($shipsAttacker, function ($ship) {
+            //     return $ship['defensePoints'] > 0;
+            // });
+            // $defenderRemainingShips = array_filter($shipsDefender, function ($ship) {
+            //     return $ship['defensePoints'] > 0;
+            // });
+
+            // if (empty($attackerRemainingShips) || empty($defenderRemainingShips)) {
+            //     dump(die);
+            // }
+
+
+            // if ($attackerDamage > $defenderDamage) {
+            //     return Response()->json('You win!');
+            // } elseif ($attackerDamage < $defenderDamage) {
+            //     return Response()->json('You lose!');
+            // } else {
+            //     return Response()->json("It's a draw!");
+            // }
+
+            // $winner = battleRounds($fighter, $frigate, $cruiser, $destroyer, $damage, $shields, $attacker_id, $defender_id, $attackerDamage, $defenderDamage);
+
+            // if ($winner === 'attacker') {
+            //     return Response()->json('You win!');
+            // } elseif ($winner === 'defender') {
+            //     return Response()->json('You lose!');
+            // } else {
+            //     return Response()->json("It's a draw!");
+            // }
+
+            // fin du combat quand une des flottes est à 0 vaisseaux
+            if ($shipsAttacker <= 0 || $shipsDefender <= 0) {
+                return 'game over';
             }
         }
+
+
 
         // on créé l'attaque si toutes les conditions recquises sont validées
         if ($fuelNeeded >= $fuel) {
