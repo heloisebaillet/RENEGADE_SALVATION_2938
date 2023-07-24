@@ -77,9 +77,8 @@ Route::middleware('jwt.verify')->group(function () {
     Route::get('/battle/{id?}/', [BattleController::class, 'read'])
         ->name('battle.read');
 
-    /*Route update user dans la partie protegée*/
-    Route::put('/user/', [AuthController::class, 'update'])
-        ->name('user.update');
+ 
+    
 });
 
 /* Route du controller AuthController avec JWT  */
