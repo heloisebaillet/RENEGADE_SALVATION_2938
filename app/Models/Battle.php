@@ -11,8 +11,9 @@ class Battle extends Model
         'ships_id',
         'attacker_id',
         'defender_id',
-        'winner_id',
-        'ressources_looted'
+        'ttl_att_pts',
+        'ttl_def_pts',
+        'resources_looted'
     ];
 
     public function winnerResources()
