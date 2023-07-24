@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\PlanetarySystem;
 use App\Models\Ressources;
+use App\Models\Ships;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -114,6 +115,26 @@ class AuthController extends Controller
         $offer3->type = "energy";
         $offer3->quantity = 20;
         $offer3->save();
+        $ships1 = new Ships();
+        $ships1->user_id = $user_id;
+        $ships1->type = "fighter";
+        $ships1->quantity = 0;
+        $ships1->save();
+        $ships2 = new Ships();
+        $ships2->user_id = $user_id;
+        $ships2->type = "frigate";
+        $ships2->quantity = 0;
+        $ships2->save();
+        $ships3 = new Ships();
+        $ships3->user_id = $user_id;
+        $ships3->type = "cruiser";
+        $ships3->quantity = 0;
+        $ships3->save();
+        $ships4 = new Ships();
+        $ships4->user_id = $user_id;
+        $ships4->type = "destroyer";
+        $ships4->quantity = 0;
+        $ships4->save();
         $credentials = $request->only('email', 'password');
 
         $token = Auth::attempt($credentials);
@@ -143,7 +164,39 @@ class AuthController extends Controller
             ], 401);
         }
     }
+    public function update(Request $request)
+    {
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|string|email|unique:users',
+            'password' => 'required|string',
+            'username' => 'required|string|unique:users',
+            'date_of_birth' => 'required|date',
+            'name' => 'required|string',
+            'picture' => 'required|string'
+        ]);
 
+        $update = User::find(Auth::user()->id);
+        $update->firstname = request('firstname');
+        $update->lastname = request('lastname');
+        $update->email = request('email');
+        $update->password = request('password');
+        $update->username = request('username');
+        $update->date_of_birth = request('date_of_birth');
+        $update->picture = request('pircture');
+        $update->save();
+        Auth::login($update);
+        
+        return response()->json([
+            'status' => 'success',
+            'user' => Auth::user(),
+            'authorisation' => [
+                'token' => Auth::refresh(),
+                'type' => 'bearer',
+            ]
+        ]);
+    }
     public function refresh()
     {
         return response()->json([

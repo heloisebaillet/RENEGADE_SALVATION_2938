@@ -12,8 +12,7 @@ class Ships extends Model
     protected $fillable = [
         'type',
         'quantity',
-        'user_id',
-        'attacker_id',
-        'defender_id'
+        'user_id'
     ];
 }
+
