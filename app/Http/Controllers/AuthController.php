@@ -143,7 +143,39 @@ class AuthController extends Controller
             ], 401);
         }
     }
+    public function update(Request $request)
+    {
+        $request->validate([
+            'firstname' => 'required|string',
+            'lastname' => 'required|string',
+            'email' => 'required|string|email|unique:users',
+            'password' => 'required|string',
+            'username' => 'required|string|unique:users',
+            'date_of_birth' => 'required|date',
+            'name' => 'required|string',
+            'picture' => 'required|string'
+        ]);
 
+        $update = User::find(Auth::user()->id);
+        $update->firstname = request('firstname');
+        $update->lastname = request('lastname');
+        $update->email = request('email');
+        $update->password = request('password');
+        $update->username = request('username');
+        $update->date_of_birth = request('date_of_birth');
+        $update->picture = request('pircture');
+        $update->save();
+        Auth::login($update);
+        
+        return response()->json([
+            'status' => 'success',
+            'user' => Auth::user(),
+            'authorisation' => [
+                'token' => Auth::refresh(),
+                'type' => 'bearer',
+            ]
+        ]);
+    }
     public function refresh()
     {
         return response()->json([
