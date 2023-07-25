@@ -46,7 +46,7 @@ Route::middleware('jwt.verify')->group(function () {
     /* Routes des Vaisseaux */
     Route::put('/ships/{type}/{operand}', [ShipsController::class, 'update'])
         ->name('ships.update');
-    Route::get('/ships/', [ShipsController::class, 'read'])
+    Route::get('/ships', [ShipsController::class, 'read'])
         ->name('ships.read');
 
     /* Route des Ressources  */
@@ -70,12 +70,11 @@ Route::middleware('jwt.verify')->group(function () {
     Route::delete('/warehouses/', [WarehouseController::class, 'delete'])
         ->name('warehouses.delete');
 
-    // Route pour consulter l'historique des batailles d'un joueur
-    Route::get('/battles', [BattleController::class, 'index']);
-    // Route pour consulter les détails d'une bataille spécifique
-    Route::get('/battles/{id}', [BattleController::class, 'show']);
-    // Route pour mettre à jour les vaisseaux d'un joueur après une bataille
-    Route::put('/battles/{id}', [BattleController::class, 'update']);
+    /* Route des battles */
+    Route::post('/battle/{id?}', [BattleController::class, 'create'])
+        ->name('battle.create');
+    Route::get('/battle', [BattleController::class, 'read'])
+        ->name('battle.read');
 });
 
 /* Route du controller AuthController avec JWT  */

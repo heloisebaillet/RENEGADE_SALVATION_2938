@@ -2,175 +2,130 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Battle;
+use App\Models\PlanetarySystem;
+use App\Models\Ship;
+use App\Models\Ressources;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 
 class BattleController extends Controller
 {
-    /**
-     * Create a new battle between an attacker and a defender.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function create(Request $request)
     {
-        // Validate the incoming request data
-        $validator = Validator::make($request->all(), [
-            'attacker_id' => 'required|integer',
-            'defender_id' => 'required|integer',
-            'attacker_ships' => 'required|array',
-            'defender_ships' => 'required|array',
-        ]);
+        $attacker_id = Auth::user()->id;
+        $x1 = PlanetarySystem::select('x_coord')->where('user_id', $attacker_id)->first();
+        $y1 = PlanetarySystem::select('y_coord')->where('user_id', $attacker_id)->first();
 
-        if ($validator->fails()) {
-            return response()->json(['error' => 'Invalid data'], 400);
+        $defender_id = $request->user_id;
+        $x2 = PlanetarySystem::select('x_coord')->where('user_id', $defender_id)->first();
+        $y2 = PlanetarySystem::select('y_coord')->where('user_id', $defender_id)->first();
+
+        $resources_looted = Battle::where('user_id', $attacker_id)->first();
+        $ttl_att_pts = 0;
+        $ttl_def_pts = 0;
+
+        $fuel = Ressources::select('quantity')->where('user_id', $attacker_id)->where('type', 'fuel')->first();
+
+        $fighter = Ship::where('type', 'fighter')->first();
+        $consoFighter = 1;
+        $frigate = Ship::where('type', 'frigate')->first();
+        $consoFrigate = 2;
+        $cruiser = Ship::where('type', 'cruiser')->first();
+        $consoCruiser = 4;
+        $destroyer = Ship::where('type', 'destroyer')->first();
+        $consoDestroyer = 8;
+
+        // Helper function to calculate distance between two coordinates
+        function calculateDistance($x1, $y1, $x2, $y2)
+        {
+            return sqrt(pow($x2 - $x1, 2) + pow($y2 - $y1, 2));
         }
 
-        $attackerId = $request->input('attacker_id');
-        $defenderId = $request->input('defender_id');
-        $attackerShips = $request->input('attacker_ships');
-        $defenderShips = $request->input('defender_ships');
-
-        // Calculate the total attack points for the attacker
-        $attackerAttackPoints = $this->calculateAttackPoints($attackerShips);
-
-        // Calculate the total defense points for the defender
-        $defenderDefensePoints = $this->calculateDefensePoints($defenderShips);
-
-        // Start the battle and calculate the results for each round
-        $rounds = [];
-        while (!empty($attackerShips) && !empty($defenderShips)) {
-            // Calculate the total attack points for the attacker in this round
-            $roundAttackerAttackPoints = $this->calculateAttackPoints($attackerShips);
-
-            // Calculate the total defense points for the defender in this round
-            $roundDefenderDefensePoints = $this->calculateDefensePoints($defenderShips);
-
-            // Determine the winner of this round
-            if ($roundAttackerAttackPoints > $roundDefenderDefensePoints) {
-                // Attacker wins this round
-                $this->destroyShips($defenderShips);
-            } elseif ($roundAttackerAttackPoints < $roundDefenderDefensePoints) {
-                // Defender wins this round
-                $this->destroyShips($attackerShips);
-            } else {
-                // Draw, both sides lose 30% of their ships
-                $this->destroyShips($attackerShips, 0.3);
-                $this->destroyShips($defenderShips, 0.3);
-            }
-
-            // Save the round results
-            $rounds[] = [
-                'attacker_ships' => $attackerShips,
-                'defender_ships' => $defenderShips,
-            ];
+        if ($fighter) {
+            $fuelNeeded = (calculateDistance($x1->x_coord, $y1->y_coord, $x2->x_coord, $y2->y_coord) * $consoFighter) / 10;
+        }
+        if ($frigate) {
+            $fuelNeeded = (calculateDistance($x1->x_coord, $y1->y_coord, $x2->x_coord, $y2->y_coord) * $consoFrigate) / 10;
+        }
+        if ($cruiser) {
+            $fuelNeeded = (calculateDistance($x1->x_coord, $y1->y_coord, $x2->x_coord, $y2->y_coord) * $consoCruiser) / 10;
+        }
+        if ($destroyer) {
+            $fuelNeeded = (calculateDistance($x1->x_coord, $y1->y_coord, $x2->x_coord, $y2->y_coord) * $consoDestroyer) / 10;
         }
 
-        // Determine the battle result
-        $battleResult = null;
-        if (empty($attackerShips) && empty($defenderShips)) {
-            $battleResult = 'Draw';
-        } elseif (empty($attackerShips)) {
-            $battleResult = 'Defender wins';
+        if ($fuelNeeded >= $fuel->quantity) {
+            return response()->json(['message' => 'Not enough fuel for the journey.'], 400);
+        }
+
+        // Deduct the consumed fuel
+        $fuelConsumed = $fuel->quantity - $fuelNeeded;
+        $fuel->quantity = $fuelConsumed;
+        $fuel->save();
+
+        // Battle outcome calculation
+        $battleOutcome = $this->battleRounds($attacker_id, $defender_id);
+
+        // Save the battle result
+        $battle = new Battle();
+        $battle->attacker_id = $attacker_id;
+        $battle->defender_id = $defender_id;
+        $battle->resources_looted = $resources_looted->resources * 0.1; // 10% of resources looted
+        $battle->battle_result = $battleOutcome;
+        $battle->save();
+
+        return response()->json(['message' => 'Battle created successfully.'], 200);
+    }
+
+    public function read()
+    {
+        $user_id = Auth::user()->id;
+        $showbattle = Battle::where('user_id', $user_id)->get();
+        return response()->json($showbattle, 200);
+    }
+
+    // Helper function to implement battle rounds and determine winner
+    private function battleRounds($attacker_id, $defender_id)
+    {
+        // Fetch ships for the attacker and defender
+        $attackerShips = Ship::where('user_id', $attacker_id)->get();
+        $defenderShips = Ship::where('user_id', $defender_id)->get();
+
+        // Initialize variables to keep track of attacker and defender damage
+        $attackerDamage = 0;
+        $defenderDamage = 0;
+
+        // Helper function to calculate damage for a given ship type
+        $calculateDamage = function ($ship, $type) {
+            return $ship->quantity * ($ship->$type * rand(0.5, 1.5));
+        };
+
+        // Calculate total attacker damage
+        if ($attackerShips->isNotEmpty()) {
+            $attackerDamage += $calculateDamage($attackerShips->where('type', 'fighter')->first(), 'attack_points');
+            $attackerDamage += $calculateDamage($attackerShips->where('type', 'frigate')->first(), 'attack_points');
+            $attackerDamage += $calculateDamage($attackerShips->where('type', 'cruiser')->first(), 'attack_points');
+            $attackerDamage += $calculateDamage($attackerShips->where('type', 'destroyer')->first(), 'attack_points');
+        }
+
+        // Calculate total defender damage
+        if ($defenderShips->isNotEmpty()) {
+            $defenderDamage += $calculateDamage($defenderShips->where('type', 'fighter')->first(), 'attack_points');
+            $defenderDamage += $calculateDamage($defenderShips->where('type', 'frigate')->first(), 'attack_points');
+            $defenderDamage += $calculateDamage($defenderShips->where('type', 'cruiser')->first(), 'attack_points');
+            $defenderDamage += $calculateDamage($defenderShips->where('type', 'destroyer')->first(), 'attack_points');
+        }
+
+        // Battle logic
+        // Determine the winner based on total damage
+        if ($attackerDamage > $defenderDamage) {
+            return 'attacker';
+        } elseif ($attackerDamage < $defenderDamage) {
+            return 'defender';
         } else {
-            $battleResult = 'Attacker wins';
+            return 'draw';
         }
-
-        // Save the battle results in the battles table
-        $this->saveBattleResults($attackerId, $defenderId, $attackerAttackPoints, $defenderDefensePoints, $battleResult);
-
-        // Update the ships for the attacker and defender based on the battle results
-        $this->updateShips($attackerId, $attackerShips);
-        $this->updateShips($defenderId, $defenderShips);
-
-        // Return the battle results
-        return response()->json(['result' => $battleResult, 'rounds' => $rounds]);
-    }
-
-    // Calculate the total attack points for a given set of ships
-    private function calculateAttackPoints($ships)
-    {
-        $totalAttackPoints = 0;
-
-        foreach ($ships as $ship) {
-            // Assume $ship['quantity'] contains the number of ships of this type
-            // $ship['attack_points'] contains the attack points for this type of ship
-            $totalAttackPoints += $ship['quantity'] * $ship['attack_points'] * $this->generateRandomFactor();
-        }
-
-        return $totalAttackPoints;
-    }
-
-    // Calculate the total defense points for a given set of ships
-    private function calculateDefensePoints($ships)
-    {
-        $totalDefensePoints = 0;
-
-        foreach ($ships as $ship) {
-            // Assume $ship['quantity'] contains the number of ships of this type
-            // $ship['defense_points'] contains the defense points for this type of ship
-            $totalDefensePoints += $ship['quantity'] * $ship['defense_points'] * $this->generateRandomFactor();
-        }
-
-        return $totalDefensePoints;
-    }
-
-    // Destroy a given percentage of ships from a set of ships
-    private function destroyShips(&$ships, $percentage = 0.3)
-    {
-        // Sort ships by strength (attack or defense points)
-        usort($ships, function ($a, $b) {
-            return ($b['attack_points'] + $b['defense_points']) <=> ($a['attack_points'] + $a['defense_points']);
-        });
-
-        // Calculate the number of ships to destroy based on the percentage
-        $numShipsToDestroy = ceil(count($ships) * $percentage);
-
-        // Destroy the weakest ships
-        array_splice($ships, 0, $numShipsToDestroy);
-    }
-
-    // Save the battle results in the battles table
-    private function saveBattleResults($attackerId, $defenderId, $attackerAttackPoints, $defenderDefensePoints, $battleResult)
-    {
-        DB::table('battles')->insert([
-            'attacker_id' => $attackerId,
-            'defender_id' => $defenderId,
-            'ttl_att_pts' => $attackerAttackPoints,
-            'ttl_def_pts' => $defenderDefensePoints,
-            'battle_result' => $battleResult,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
-
-    // Update the ships for a given player based on the battle results
-    private function updateShips($userId, $updatedShips)
-    {
-        // Assume ships are already in the correct format with 'type', 'quantity', 'attack_points', 'defense_points'
-
-        // Clear the existing ships for the user
-        DB::table('ships')->where('user_id', $userId)->delete();
-
-        // Insert the updated ships
-        foreach ($updatedShips as $ship) {
-            DB::table('ships')->insert([
-                'user_id' => $userId,
-                'type' => $ship['type'],
-                'quantity' => $ship['quantity'],
-                'attack_points' => $ship['attack_points'],
-                'defense_points' => $ship['defense_points'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-    }
-
-    // Generate a random factor between 0.5 and 1.5
-    private function generateRandomFactor()
-    {
-        return mt_rand(5, 15) / 10;
     }
 }

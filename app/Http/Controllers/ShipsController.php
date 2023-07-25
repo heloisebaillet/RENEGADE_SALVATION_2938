@@ -18,17 +18,19 @@ class ShipsController extends Controller
     public function Read()
     {
         $user_id = Auth::User()->id;
-        $fighter = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'fighter')->get();
-        $frigate = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'frigate')->get();
-        $cruiser = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'cruiser')->get();
-        $destroyer = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'destroyer')->get();
+        $fighter = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'fighter')->first();
+        $frigate = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'frigate')->first();
+        $cruiser = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'cruiser')->first();
+        $destroyer = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'destroyer')->first();
+
         $response = [
-            'fighter' => $fighter,
-            'frigate' => $frigate,
-            'cruiser' => $cruiser,
-            'destroyer' => $destroyer,
+            'fighter' => $fighter->quantity,
+            'frigate' => $frigate->quantity,
+            'cruiser' => $cruiser->quantity,
+            'destroyer' => $destroyer->quantity,
         ];
-        return response()->json($response, 200);
+
+        return response()->json(['status' => 'success', 'ships' => $response], 200);
     }
     public function Update(Request $request, $type = null, $operand)
     {
@@ -108,7 +110,7 @@ class ShipsController extends Controller
                 $update->type = "destroyer";
                 $update->quantity = $update->quantity - 1;
                 $update->save();
-                
+
 
                 return Response()->json($update, 201);
             } else {
