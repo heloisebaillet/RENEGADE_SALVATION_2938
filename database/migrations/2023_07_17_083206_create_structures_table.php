@@ -13,13 +13,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('structures', function (Blueprint $table) {
-            $table->increments('id')->foreign('ships.structure_id');
+            $table->increments('id');
             $table->integer('user_id');
             $table->string('type', 100);
             $table->integer('level');
             $table->integer('energy_consumption');
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->useCurrent();
         });
     }
 

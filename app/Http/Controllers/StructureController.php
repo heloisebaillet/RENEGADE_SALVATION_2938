@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ressources;
+use App\Models\Shipyard;
 use App\Models\Structure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -74,11 +75,8 @@ class StructureController extends Controller
             if ($type == "shipyard") {
                 if ($ore->quantity >= 1000) {
                     $energy_consumption = '0';
-                    $shipyard = new Structure();
+                    $shipyard = new Shipyard();
                     $shipyard->user_id = $user_id;
-                    $shipyard->type = $type;
-                    $shipyard->level = $level;
-                    $shipyard->energy_consumption = $energy_consumption;
                     $shipyard->save();
                     $ore->quantity = $ore->quantity - 1000;
                     $ore->save();

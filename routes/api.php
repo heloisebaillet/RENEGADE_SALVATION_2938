@@ -3,10 +3,10 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
 use App\Http\Controllers\RessourcesController;
+use App\Http\Controllers\ShipsController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
-use App\Models\Battle;
-use App\Models\User;
+use App\Http\Controllers\BattleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +43,11 @@ Route::middleware('jwt.verify')->group(function () {
     Route::delete('/structures/{id?}', [StructureController::class, 'delete'])
         ->name('structures.delete');
 
+    /* Routes des Vaisseaux */
+    Route::put('/ships/{type}/{operand}', [ShipsController::class, 'update'])
+        ->name('ships.update');
+    Route::get('/ships/', [ShipsController::class, 'read'])
+        ->name('ships.read');
 
     /* Route des Ressources  */
     /* Désactivation de la route create
@@ -50,9 +55,9 @@ Route::middleware('jwt.verify')->group(function () {
     /*->name('ressources.create');
     */
     Route::get('ressources/', [RessourcesController::class, 'read'])
-    ->name('ressources.read');
+        ->name('ressources.read');
     Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
-    ->name('ressources.update');
+        ->name('ressources.update');
 
     /* Routes des entrepôts */
     /* Désactivation de la route create
@@ -60,7 +65,7 @@ Route::middleware('jwt.verify')->group(function () {
      /*   ->name('warehouses.create');*/
     Route::get('/warehouses/', [WarehouseController::class, 'read'])
         ->name('warehouses.read');
-    Route::put  ('/warehouses/', [WarehouseController::class, 'update'])
+    Route::put('/warehouses/', [WarehouseController::class, 'update'])
         ->name('warehouses.update');
     Route::delete('/warehouses/', [WarehouseController::class, 'delete'])
         ->name('warehouses.delete');
@@ -80,4 +85,3 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
-
