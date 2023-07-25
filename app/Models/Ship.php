@@ -8,11 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Ship extends Model
 {
     use HasFactory;
-    protected $table = 'ships';
+
     protected $fillable = [
+        'user_id',
         'type',
         'quantity',
-        'user_id'
+        'attacker_id',
+        'defender_id',
     ];
-}
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
