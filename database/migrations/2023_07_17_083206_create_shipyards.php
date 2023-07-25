@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('user_id');
             $table->string('type', 100)->nullable();
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable();
         });
     }
 
