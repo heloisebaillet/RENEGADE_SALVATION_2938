@@ -47,9 +47,7 @@ class ShipsController extends Controller
                 $update = $shipyard;
                 return Response()->json($update, 201);
             }
-            else {
-                return Response()->json(['success' => 'false'], 400);
-            }
+
             if ($type == "frigate" && $ore->quantity >= 200 && $shipyard->type === null) {
                 $shipyard->type = "frigate";
                 $shipyard->save();
@@ -57,9 +55,6 @@ class ShipsController extends Controller
                 $ore->save();
                 $update = $shipyard;
                 return Response()->json($update, 201);
-            }
-            else {
-                return Response()->json(['success' => 'false'], 400);
             }
             if ($type == "cruiser" && $ore->quantity >= 800 && $shipyard->type === null) {
                 $shipyard->type = "cruiser";
@@ -69,9 +64,7 @@ class ShipsController extends Controller
                 $update = $shipyard;
                 return Response()->json($update, 201);
             }
-            else {
-                return Response()->json(['success' => 'false'], 400);
-            }
+        
             if ($type == "destroyer" && $ore->quantity >= 2000 && $shipyard->type === null) {
                 $shipyard->type = "destroyer";
                 $shipyard->save();
@@ -79,10 +72,9 @@ class ShipsController extends Controller
                 $ore->save();
                 $update = $shipyard;
                 return Response()->json($update, 201);
-            } else {
-                return Response()->json(['success' => 'false'], 400);
-            }
-        } else if ($operand === "remove") {
+            } 
+        } 
+         if ($operand === "remove") {
 
             if ($type == "fighter" && $update->quantity >= 1) {
                 $update->type = "fighter";
