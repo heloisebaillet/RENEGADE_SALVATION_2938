@@ -6,6 +6,7 @@ use App\Models\Battle;
 use App\Models\PlanetarySystem;
 use App\Models\Ships;
 use App\Models\Ressources;
+use App\Models\Ship;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -29,13 +30,13 @@ class BattleController extends Controller
 
         $fuel = Ressources::select('quantity')->where('user_id', $attacker_id)->where('type', 'fuel')->get();
 
-        $fighter = Ships::where('type', 'fighter')->get();
+        $fighter = Ship::where('type', 'fighter')->get();
         $consoFighter = 1;
-        $frigate = Ships::where('type', 'frigate')->get();
+        $frigate = Ship::where('type', 'frigate')->get();
         $consoFrigate = 2;
-        $cruiser = Ships::where('type', 'cruiser')->get();
+        $cruiser = Ship::where('type', 'cruiser')->get();
         $consoCruiser = 4;
-        $destroyer = Ships::where('type', 'destroyer')->get();
+        $destroyer = Ship::where('type', 'destroyer')->get();
         $consoDestroyer = 8;
 
 
@@ -72,11 +73,11 @@ class BattleController extends Controller
         {
             // $gameOver = Ships::where('quantity', '0')->get();
 
-            $shipsAttacker = Ships::where('user_id', $attacker_id)->get();
-            $shipsDefender = Ships::where('user_id', $defender_id)->get();
-            $ships = Ships::where('quantity')->get();
-            $attacker_id = Ships::where('attacker_id')->get();
-            $defender_id = Ships::where('defender_id')->get();
+            $shipsAttacker = Ship::where('user_id', $attacker_id)->get();
+            $shipsDefender = Ship::where('user_id', $defender_id)->get();
+            $ships = Ship::where('quantity')->get();
+            $attacker_id = Ship::where('attacker_id')->get();
+            $defender_id = Ship::where('defender_id')->get();
 
             // on calcule les points d'attaque de tous les vaisseaux par type et par round
             if ($fighter && $shipsAttacker && $shipsDefender) {
@@ -116,17 +117,21 @@ class BattleController extends Controller
 
             //Perte de 30% de ses vaisseaux au joueur perdant du round
             if ($fighter <= 0) {
-                return $fighter->quantity = $ships * 0.7;
+                return $fighter->quantity = $ships * 0.3;
             }
             if ($fighter <= 0 && $frigate <= 0) {
-                return $frigate->quantity = $ships * 0.7;
+                return $frigate->quantity = $ships * 0.3;
             }
             if ($fighter <= 0 && $frigate <= 0 && $cruiser <= 0) {
-                return $cruiser->quantity = $ships * 0.7;
+                return $cruiser->quantity = $ships * 0.3;
             }
             if ($fighter <= 0 && $frigate <= 0 && $cruiser <= 0 && $destroyer <= 0) {
-                return $fighter->quantity = $ships * 0.7;
+                return $fighter->quantity = $ships * 0.3;
             }
+
+            // mise à jour du nombre de vaisseaux post battle
+
+            $ships->quantity->save();
 
             // on lance une boucle pour attaquer jusqu'à ce qu'une des deux
             // flottes ait la défense de tous ses vaisseaux à 0
