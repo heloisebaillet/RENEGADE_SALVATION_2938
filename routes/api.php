@@ -7,6 +7,7 @@ use App\Http\Controllers\ShipsController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BattleController;
+use App\Http\Controllers\ShipyardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,10 +45,15 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('structures.delete');
 
     /* Routes des Vaisseaux */
-    Route::put('/ships/{type}/{operand}', [ShipsController::class, 'update'])
+    Route::put('/ships/{type}/{operand}/{nbr_minus?}', [ShipsController::class, 'update'])
         ->name('ships.update');
     Route::get('/ships/', [ShipsController::class, 'read'])
         ->name('ships.read');
+    /* Routes des Shipyard */
+    Route::get('/shipyard/', [ShipyardController::class, 'read'])
+        ->name('shipyard.read');
+        Route::get('/shipyard/available/', [ShipyardController::class, 'vacant'])
+        ->name('shipyard.read_vacant');
 
     /* Route des Ressources  */
     /* Désactivation de la route create
@@ -75,7 +81,6 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle/{id?}/', [BattleController::class, 'read'])
         ->name('battle.read');
-
 });
 
 /* Route du controller AuthController avec JWT  */
