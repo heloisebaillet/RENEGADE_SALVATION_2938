@@ -28,7 +28,6 @@ class User extends Authenticatable implements JWTSubject
         'date_of_birth',
         'email',
         'password',
-        'reset_pwd_token',
         'username',
         'date_of_birth',
         'planetary_system_name',

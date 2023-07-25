@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('lastname', 100);
             $table->string('email', 100)->unique();
             $table->string('password', 100);
-            $table->string('reset_pwd_token', 100);
             $table->string('username', 50)->unique();
             $table->date('date_of_birth');
             $table->string('picture', 255)->nullable();
