@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\Ressources;
-use App\Models\Ships;
-
+use App\Models\Ship;
 use App\Models\Structure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,10 +18,10 @@ class ShipsController extends Controller
     public function Read()
     {
         $user_id = Auth::User()->id;
-        $fighter = Ships::select('quantity')->where('user_id', $user_id)->where('type', 'fighter')->get();
-        $frigate = Ships::select('quantity')->where('user_id', $user_id)->where('type', 'frigate')->get();
-        $cruiser = Ships::select('quantity')->where('user_id', $user_id)->where('type', 'cruiser')->get();
-        $destroyer = Ships::select('quantity')->where('user_id', $user_id)->where('type', 'destroyer')->get();
+        $fighter = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'fighter')->get();
+        $frigate = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'frigate')->get();
+        $cruiser = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'cruiser')->get();
+        $destroyer = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'destroyer')->get();
         $response = [
             'fighter' => $fighter,
             'frigate' => $frigate,
@@ -35,7 +34,7 @@ class ShipsController extends Controller
     {
         $user_id = Auth::User()->id;
         $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
-        $update = Ships::where('user_id', $user_id)->where('type', $type)->first();
+        $update = Ship::where('user_id', $user_id)->where('type', $type)->first();
 
         if ($operand === "add") {
             if ($type == "fighter" && $ore->quantity >= 50) {

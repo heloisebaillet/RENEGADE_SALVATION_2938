@@ -57,10 +57,7 @@ class RessourcesController extends Controller
         $capacity = ($showwarehouse->quantity * 500);
         $calcul_ore = $ore->quantity;
         $calcul_fuel = $fuel->quantity;
-        $ressources_ore = ($calcul_ore == null ? 0 : $calcul_ore);
-        $capacity_rest_ore = $capacity - $ressources_ore;
-        $ressources_fuel = ($calcul_fuel == null ? 0 : $calcul_fuel);
-        $capacity_rest_fuel = $capacity - $ressources_fuel;
+
         $energy = Ressources::select('quantity')->where('user_id', $user_id)->where('type', 'energy')->first();
         $today = date("Y-m-d H:i:s");
         // Partie calcul de la production de ressources, avant envoi sur la partie front
@@ -83,11 +80,11 @@ class RessourcesController extends Controller
             $mine->save();
         }
         //permet de limiter les ressources de minerais par rapport aux nombres de warehouse 
-        $total_rest_ore = $capacity_rest_ore - $calcul_ore;
-        if ($total_rest_ore > 0) {
+       
+        if ($capacity > $calcul_ore) {
             $ore->quantity = $calcul_ore;
             $ore->save();
-        } else if ($total_rest_ore <= 0) {
+        } else {
             $ore->quantity = $capacity;
             $ore->save();
         }
@@ -101,11 +98,10 @@ class RessourcesController extends Controller
             $raffinery->save();
         }
         //permet de limiter les ressources de minerais par rapport aux nombres de warehouse 
-        $total_rest_fuel = $capacity_rest_fuel - $calcul_fuel;
-        if ($total_rest_fuel > 0) {
+        if ($capacity > $calcul_fuel) {
             $fuel->quantity = $calcul_fuel;
             $fuel->save();
-        } else if ($total_rest_fuel <= 0) {
+        } else {
             $fuel->quantity = $capacity;
             $fuel->save();
         }
