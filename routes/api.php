@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlanetarySystemController;
 use App\Http\Controllers\RessourcesController;
+use App\Http\Controllers\ShipsController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BattleController;
@@ -45,6 +46,11 @@ Route::middleware('jwt.verify')->group(function () {
     Route::delete('/structures/{id?}', [StructureController::class, 'delete'])
         ->name('structures.delete');
 
+    /* Routes des Vaisseaux */
+    Route::put('/ships/{type}/{operand}', [ShipsController::class, 'update'])
+        ->name('ships.update');
+    Route::get('/ships/', [ShipsController::class, 'read'])
+        ->name('ships.read');
 
     /* Route des Ressources  */
     /* Désactivation de la route create
@@ -72,6 +78,7 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle/{id?}/', [BattleController::class, 'read'])
         ->name('battle.read');
+
 });
 
 /* Route du controller AuthController avec JWT  */

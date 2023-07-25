@@ -3,7 +3,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ships;
+
+use App\Models\Ressources;
+use App\Models\Ship;
 use App\Models\Structure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,122 +14,105 @@ use Illuminate\Support\Facades\Auth;
 class ShipsController extends Controller
 {
 
-    public function create($type = null)
+
+    public function Read()
     {
-        $user_id = Auth::user()->id;
-        if ($type == "cruiser" || $type == "destroyer" || $type == "fighter" || $type == "frigate") {
-
-            if ($type == "fighter") {
-                $fighter = new Ships();
-                $fighter->user_id = $user_id;
-                $fighter->type = $type;
-                $fighter->quantity += 1;
-
-                $ore = 50;
-
-                if ($ore >= 50) {
-                    return Response()->json($fighter, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
-            }
-
-            if ($type == "frigate") {
-                $frigate = new ships();
-                $frigate->user_id = $user_id;
-                $frigate->type = $type;
-                $frigate->quantity += 1;
-
-                $ore = 200;
-
-                if ($ore >= 200) {
-                    return Response()->json($frigate, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
-            }
-
-            if ($type == "cruiser") {
-                $cruiser = new ships();
-                $cruiser->type = $type;
-                $cruiser->user_id = $user_id;
-                $cruiser->quantity += 1;
-
-                $ore = 800;
-
-                if ($ore >= 800) {
-                    return Response()->json($cruiser, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
-            }
-
-            if ($type == "destroyer") {
-                $destroyer = new ships();
-                $destroyer->type = $type;
-                $destroyer->user_id = $user_id;
-
-                $ore = 2000;
-
-                if ($ore >= 2000) {
-                    return Response()->json($destroyer, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
-            }
-        }
+        $user_id = Auth::User()->id;
+        $fighter = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'fighter')->get();
+        $frigate = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'frigate')->get();
+        $cruiser = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'cruiser')->get();
+        $destroyer = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'destroyer')->get();
+        $response = [
+            'fighter' => $fighter,
+            'frigate' => $frigate,
+            'cruiser' => $cruiser,
+            'destroyer' => $destroyer,
+        ];
+        return response()->json($response, 200);
     }
-
-    public function Update(Request $request, $type = null)
+    public function Update(Request $request, $type = null, $operand)
     {
-        $user_id = "1";
+        $user_id = Auth::User()->id;
+        $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
+        $update = Ship::where('user_id', $user_id)->where('type', $type)->first();
 
-        $type = ships::where('user_id', $user_id)->first();
+        if ($operand === "add") {
+            if ($type == "fighter" && $ore->quantity >= 50) {
+                //$fuel_consumption ="";
+                $update->type = "fighter";
+                $update->quantity = $update->quantity + 1;
+                $update->save();
+                $ore->quantity = $ore->quantity - 50;
+                $ore->save();
 
-        if ($type == "fighter" || $type == "frigate" || $type == "cruiser" || $type == "destroyer") {
-            if ($type == "fighter") {
-                $ore = 50;
-                $type->quantity += 1;
-                $type->save();
-
-                if ($ore >= 50) {
-                    return Response()->json($type, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
+                return Response()->json($update, 201);
             }
-            if ($type == "frigate") {
-                $ore = 200;
-                $type->quantity += 1;
-                $type->save();
+            if ($type == "frigate" && $ore->quantity >= 200) {
+                //$fuel_consumption ="";
+                $update->type = "frigate";
+                $update->quantity = $update->quantity + 1;
+                $update->save();
+                $ore->quantity = $ore->quantity - 200;
+                $ore->save();
 
-                if ($ore = 200) {
-                    return Response()->json($type, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
+                return Response()->json($update, 201);
             }
-            if ($type == "cruiser") {
-                $ore = 800;
-                $type->quantity += 1;
-                $type->save();
+            if ($type == "cruiser" && $ore->quantity >= 800) {
+                //$fuel_consumption ="";
+                $update->type = "cruiser";
+                $update->quantity = $update->quantity + 1;
+                $update->save();
+                $ore->quantity = $ore->quantity - 800;
+                $ore->save();
 
-                if ($ore >= 800) {
-                    return Response()->json($type, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
+                return Response()->json($update, 201);
             }
-            if ($type == "destroyer") {
-                $ore = 2000;
-                $type->quantity += 1;
-                $type->save();
+            if ($type == "destroyer" && $ore->quantity >= 2000) {
+                //$fuel_consumption ="";
+                $update->type = "destroyer";
+                $update->quantity = $update->quantity + 1;
+                $update->save();
+                $ore->quantity = $ore->quantity - 2000;
+                $ore->save();
 
-                if ($ore >= 2000) {
-                    return Response()->json($type, 201);
-                } else {
-                    return Response()->json(['success' => 'false'], 400);
-                }
+                return Response()->json($update, 201);
+            } else {
+                return Response()->json(['success' => 'false'], 400);
+            }
+        } else if ($operand === "remove") {
+
+            if ($type == "fighter" && $update->quantity >= 1) {
+                //$fuel_consumption ="";
+                $update->type = "fighter";
+                $update->quantity = $update->quantity - 1;
+                $update->save();
+                return Response()->json($update, 201);
+            }
+            if ($type == "frigate" && $update->quantity >= 1) {
+                //$fuel_consumption ="";
+                $update->type = "frigate";
+                $update->quantity = $update->quantity - 1;
+                $update->save();
+                return Response()->json($update, 201);
+            }
+            if ($type == "cruiser" && $update->quantity >= 1) {
+                //$fuel_consumption ="";
+                $update->type = "cruiser";
+                $update->quantity = $update->quantity - 1;
+                $update->save();
+
+                return Response()->json($update, 201);
+            }
+            if ($type == "destroyer" && $update->quantity >= 1) {
+                //$fuel_consumption ="";
+                $update->type = "destroyer";
+                $update->quantity = $update->quantity - 1;
+                $update->save();
+                
+
+                return Response()->json($update, 201);
+            } else {
+                return Response()->json(['success' => 'false'], 400);
             }
         }
     }

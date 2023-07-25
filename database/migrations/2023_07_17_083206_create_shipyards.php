@@ -12,15 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ships', function (Blueprint $table) {
-            $table->increments('id')->foreign('battles.ships_id');
+        Schema::create('shipyards', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('user_id');
-            $table->string('type', 100);
-            $table->integer('quantity');
-            $table->integer('attacker_id')->nullable();
-            $table->integer('defender_id')->nullable();
+            $table->string('type', 100)->nullable();
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->useCurrent();
         });
     }
 
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ships');
+        Schema::dropIfExists('structures');
     }
 };
