@@ -6,9 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Ressources;
 use App\Models\Ship;
-use App\Models\Structure;
+use App\Models\Shipyard;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class ShipsController extends Controller
@@ -32,83 +31,75 @@ class ShipsController extends Controller
 
         return response()->json(['status' => 'success', 'ships' => $response], 200);
     }
-    public function Update(Request $request, $type = null, $operand)
+    public function Update(Request $request, $type = null, $operand = null, $nbr_minus = null)
     {
         $user_id = Auth::User()->id;
         $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
         $update = Ship::where('user_id', $user_id)->where('type', $type)->first();
+        $shipyard = Shipyard::where('user_id', $user_id)->whereNull('type')->first();
 
         if ($operand === "add") {
-            if ($type == "fighter" && $ore->quantity >= 50) {
-                //$fuel_consumption ="";
-                $update->type = "fighter";
-                $update->quantity = $update->quantity + 1;
-                $update->save();
+            if ($type == "fighter" && $ore->quantity >= 50 && isset($shipyard)) {
+                $shipyard->type = "fighter";
+                $shipyard->save();
                 $ore->quantity = $ore->quantity - 50;
                 $ore->save();
-
+                $update = $shipyard;
                 return Response()->json($update, 201);
             }
-            if ($type == "frigate" && $ore->quantity >= 200) {
-                //$fuel_consumption ="";
-                $update->type = "frigate";
-                $update->quantity = $update->quantity + 1;
-                $update->save();
+
+            if ($type == "frigate" && $ore->quantity >= 200 && isset($shipyard)) {
+                $shipyard->type = "frigate";
+                $shipyard->save();
                 $ore->quantity = $ore->quantity - 200;
                 $ore->save();
-
+                $update = $shipyard;
                 return Response()->json($update, 201);
             }
-            if ($type == "cruiser" && $ore->quantity >= 800) {
-                //$fuel_consumption ="";
-                $update->type = "cruiser";
-                $update->quantity = $update->quantity + 1;
-                $update->save();
+            if ($type == "cruiser" && $ore->quantity >= 800 && isset($shipyard)) {
+                $shipyard->type = "cruiser";
+                $shipyard->save();
                 $ore->quantity = $ore->quantity - 800;
                 $ore->save();
-
+                $update = $shipyard;
                 return Response()->json($update, 201);
             }
-            if ($type == "destroyer" && $ore->quantity >= 2000) {
-                //$fuel_consumption ="";
-                $update->type = "destroyer";
-                $update->quantity = $update->quantity + 1;
-                $update->save();
+
+            if ($type == "destroyer" && $ore->quantity >= 2000 && isset($shipyard)) {
+                $shipyard->type = "destroyer";
+                $shipyard->save();
                 $ore->quantity = $ore->quantity - 2000;
                 $ore->save();
-
+                $update = $shipyard;
                 return Response()->json($update, 201);
             } else {
                 return Response()->json(['success' => 'false'], 400);
             }
-        } else if ($operand === "remove") {
+        }
+        if ($operand === "remove") {
 
             if ($type == "fighter" && $update->quantity >= 1) {
-                //$fuel_consumption ="";
                 $update->type = "fighter";
-                $update->quantity = $update->quantity - 1;
+                $update->quantity = $update->quantity - $nbr_minus;
                 $update->save();
                 return Response()->json($update, 201);
             }
             if ($type == "frigate" && $update->quantity >= 1) {
-                //$fuel_consumption ="";
                 $update->type = "frigate";
-                $update->quantity = $update->quantity - 1;
+                $update->quantity = $update->quantity - $nbr_minus;
                 $update->save();
                 return Response()->json($update, 201);
             }
             if ($type == "cruiser" && $update->quantity >= 1) {
-                //$fuel_consumption ="";
                 $update->type = "cruiser";
-                $update->quantity = $update->quantity - 1;
+                $update->quantity = $update->quantity - $nbr_minus;
                 $update->save();
 
                 return Response()->json($update, 201);
             }
             if ($type == "destroyer" && $update->quantity >= 1) {
-                //$fuel_consumption ="";
                 $update->type = "destroyer";
-                $update->quantity = $update->quantity - 1;
+                $update->quantity = $update->quantity - $nbr_minus;
                 $update->save();
 
 
