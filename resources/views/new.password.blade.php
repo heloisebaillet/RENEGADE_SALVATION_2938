@@ -1,4 +1,4 @@
-@extends('layout')
+<!-- @extends('layout')
 @section('content')
 <main>
     <div class="ms-auto me-auto mt-5" style="width: 500px">
@@ -19,7 +19,6 @@
             </div>
             @endif
         </div>
-        <p>We'll send a link to your e-mail address</p>
         <form action="{{route('reset.password.post')}}" method="POST">
             @csrf
             <input type="text" name="token" hidden value="{{$token}}">
@@ -39,4 +38,4 @@
         </form>
     </div>
 </main>
-@endsection
+@endsection -->

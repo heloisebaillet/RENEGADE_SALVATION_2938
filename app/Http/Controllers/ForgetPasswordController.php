@@ -36,12 +36,12 @@ class ForgetPasswordManager extends Controller
             $message->subject('Reset Password');
         });
 
-        return redirect()->to(route('forget.password'))->with('success', "We have sent you an e-mail to reset your password.");
+        return response()->json(['status' => 'success', 'message' => 'We have sent you an e-mail to reset your password.']);
     }
 
     function resetPassword($token)
     {
-        return view('new-password', compact('token'));
+        return view('reset-password', compact('token'));
     }
 
     function resetPasswordPost(Request $request)

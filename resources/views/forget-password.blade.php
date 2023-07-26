@@ -1,4 +1,5 @@
-@extends('layout')
+<!-- @extends('layout')
+
 @section('content')
 <main>
     <div class="ms-auto me-auto mt-5" style="width: 500px">
@@ -30,4 +31,4 @@
         </form>
     </div>
 </main>
-@endsection
+@endsection -->
