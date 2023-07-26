@@ -87,6 +87,10 @@ Route::middleware('jwt.verify')->group(function () {
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('register', 'register');
+
+    Route::match(['get', 'post'], 'update', 'updateProfile');
+    
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
+
