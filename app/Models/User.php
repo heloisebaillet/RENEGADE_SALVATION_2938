@@ -44,7 +44,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function planetarySystem()
     {
-        return $this->hasOne(PlanetarySystem::class);
+        return $this->belongsTo(PlanetarySystem::class, 'planetary_system_name', 'name');
     }
 
 

@@ -9,13 +9,20 @@ use Illuminate\Support\Facades\Auth;
 
 class PlanetarySystemController extends Controller
 {
+
+    public function index1()
+    {
+        $planetarySystems = PlanetarySystem::select('id', 'x_coord', 'y_coord')->get();
+        return response()->json(['planetarySystems' => $planetarySystems], 200);
+    }
+
     //public function create(Request $request)
     //{
     //    $user_id = Auth::user()->id;
     //    // pour le moment : 
     //    $name = $request->name;
-        // quand name system implanté dans formulaire d'inscription user :
-        //$user_id = Auth::user()->name;
+    // quand name system implanté dans formulaire d'inscription user :
+    //$user_id = Auth::user()->name;
     //    $x_coord = random_int(1, 999);
     //    $y_coord = random_int(1, 999);
     //

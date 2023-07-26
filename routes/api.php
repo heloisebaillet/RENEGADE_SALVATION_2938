@@ -52,7 +52,7 @@ Route::middleware('jwt.verify')->group(function () {
     /* Routes des Shipyard */
     Route::get('/shipyard/', [ShipyardController::class, 'read'])
         ->name('shipyard.read');
-        Route::get('/shipyard/available/', [ShipyardController::class, 'vacant'])
+    Route::get('/shipyard/available/', [ShipyardController::class, 'vacant'])
         ->name('shipyard.read_vacant');
 
     /* Route des Ressources  */
@@ -81,6 +81,7 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle', [BattleController::class, 'read'])
         ->name('battle.read');
+    Route::get('/planetary-systems', [PlanetarySystemController::class, 'index1']);
 });
 
 /* Route du controller AuthController avec JWT  */
