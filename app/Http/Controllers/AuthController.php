@@ -164,30 +164,29 @@ class AuthController extends Controller
             ], 401);
         }
     }
-    public function update(Request $request)
+    public function updateProfile(Request $request)
     {
         $request->validate([
             'firstname' => 'required|string',
             'lastname' => 'required|string',
-            'email' => 'required|string|email|unique:users',
+            // vu que c'est unique, j'ajoute l'id pour exclure le user de la recherche d'unicité
+            //dans la table Users.
+            'email' => 'required|string|email|unique:users,email,' . Auth::user()->id,
             'password' => 'required|string',
-            'username' => 'required|string|unique:users',
-            'date_of_birth' => 'required|date',
-            'name' => 'required|string',
+            'username' => 'required|string|unique:users,username,' . Auth::user()->id,
             'picture' => 'required|string'
         ]);
 
         $update = User::find(Auth::user()->id);
-        $update->firstname = request('firstname');
-        $update->lastname = request('lastname');
-        $update->email = request('email');
-        $update->password = request('password');
-        $update->username = request('username');
-        $update->date_of_birth = request('date_of_birth');
-        $update->picture = request('pircture');
+        $update->firstname = $request->input('firstname');
+        $update->lastname = $request->input('lastname');
+        $update->email = $request->input('email');
+        $update->password = Hash::make($request->input('password'));
+        $update->username = $request->input('username');
+        $update->picture = $request->input('picture');
         $update->save();
         Auth::login($update);
-        
+
         return response()->json([
             'status' => 'success',
             'user' => Auth::user(),
@@ -197,6 +196,7 @@ class AuthController extends Controller
             ]
         ]);
     }
+
     public function refresh()
     {
         return response()->json([
