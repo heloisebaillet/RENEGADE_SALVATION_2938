@@ -39,7 +39,7 @@ class ShipsController extends Controller
         $shipyard = Shipyard::where('user_id', $user_id)->whereNull('type')->first();
 
         if ($operand === "add") {
-            if ($type == "fighter" && $ore->quantity >= 50 && $shipyard->type === null) {
+            if ($type == "fighter" && $ore->quantity >= 50 && isset($shipyard)) {
                 $shipyard->type = "fighter";
                 $shipyard->save();
                 $ore->quantity = $ore->quantity - 50;
@@ -48,7 +48,7 @@ class ShipsController extends Controller
                 return Response()->json($update, 201);
             }
 
-            if ($type == "frigate" && $ore->quantity >= 200 && $shipyard->type === null) {
+            if ($type == "frigate" && $ore->quantity >= 200 && isset($shipyard)) {
                 $shipyard->type = "frigate";
                 $shipyard->save();
                 $ore->quantity = $ore->quantity - 200;
@@ -56,7 +56,7 @@ class ShipsController extends Controller
                 $update = $shipyard;
                 return Response()->json($update, 201);
             }
-            if ($type == "cruiser" && $ore->quantity >= 800 && $shipyard->type === null) {
+            if ($type == "cruiser" && $ore->quantity >= 800 && isset($shipyard)) {
                 $shipyard->type = "cruiser";
                 $shipyard->save();
                 $ore->quantity = $ore->quantity - 800;
@@ -65,7 +65,7 @@ class ShipsController extends Controller
                 return Response()->json($update, 201);
             }
         
-            if ($type == "destroyer" && $ore->quantity >= 2000 && $shipyard->type === null) {
+            if ($type == "destroyer" && $ore->quantity >= 2000 && isset($shipyard)) {
                 $shipyard->type = "destroyer";
                 $shipyard->save();
                 $ore->quantity = $ore->quantity - 2000;
@@ -73,6 +73,9 @@ class ShipsController extends Controller
                 $update = $shipyard;
                 return Response()->json($update, 201);
             } 
+            else {
+                return Response()->json(['success' => 'false'], 400);
+            }
         } 
          if ($operand === "remove") {
 
