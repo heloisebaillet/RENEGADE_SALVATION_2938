@@ -15,8 +15,7 @@ class PlanetarySystemController extends Controller
 
         $user_id = Auth::User()->id;
         $planetarySystems = PlanetarySystem::select('planetary_system.id', 'planetary_system.x_coord', 'planetary_system.y_coord', 'users.planetary_system_name')
-            ->leftJoin('users', 'planetary_system.id', '=', 'users.planetary_system_name')
-            ->whereNull('users.planetary_system_name')
+            ->leftJoin('users', 'users.id', '=', 'planetary_system.user_id')
             ->get();
 
         return response()->json(['planetarySystems' => $planetarySystems], 200);

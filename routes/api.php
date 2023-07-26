@@ -81,6 +81,8 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle', [BattleController::class, 'read'])
         ->name('battle.read');
+        Route::post('/attack', [BattleController::class, 'attack'])
+        ->name('battle.attack');
     Route::get('/planetary-systems', [PlanetarySystemController::class, 'index1']);
 });
 
