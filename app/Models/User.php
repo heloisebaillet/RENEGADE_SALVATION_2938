@@ -32,21 +32,6 @@ class User extends Authenticatable implements JWTSubject
         'picture'
     ];
 
-    public function ships()
-    {
-        return $this->hasMany(Ship::class);
-    }
-
-    public function battles()
-    {
-        return $this->hasMany(Battle::class, 'attacker_id', 'id');
-    }
-
-    public function planetarySystem()
-    {
-        return $this->belongsTo(PlanetarySystem::class, 'planetary_system_name', 'name');
-    }
-
 
     /**
      * The attributes that should be hidden for serialization.

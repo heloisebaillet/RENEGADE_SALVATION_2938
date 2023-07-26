@@ -9,13 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PlanetarySystemController extends Controller
 {
-
-    public function index1()
-    {
-        $planetarySystems = PlanetarySystem::select('id', 'x_coord', 'y_coord')->get();
-        return response()->json(['planetarySystems' => $planetarySystems], 200);
-    }
-
     //public function create(Request $request)
     //{
     //    $user_id = Auth::user()->id;

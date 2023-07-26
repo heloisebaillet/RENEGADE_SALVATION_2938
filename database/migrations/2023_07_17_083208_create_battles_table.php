@@ -7,30 +7,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
-
-
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('battles', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('attacker_id');
-            $table->unsignedBigInteger('defender_id');
+            $table->integer('attacker_id');
+            $table->integer('defender_id');
+            $table->integer('ttl_att_pts');
+            $table->integer('ttl_def_pts');
             $table->integer('resources_looted');
-            $table->timestamps();
-
-            // Ajout des détails des vaisseaux engagés dans le combat pour chaque camp
-            $table->json('attacker_ships')->nullable();
-            $table->json('defender_ships')->nullable();
-
-            $table->foreign('attacker_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('defender_id')->references('id')->on('users')->onDelete('cascade');
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
     }
 
-
-
-
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('battles');

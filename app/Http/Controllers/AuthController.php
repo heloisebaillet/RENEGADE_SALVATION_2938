@@ -187,7 +187,7 @@ class AuthController extends Controller
         $update->picture = request('pircture');
         $update->save();
         Auth::login($update);
-        
+
         return response()->json([
             'status' => 'success',
             'user' => Auth::user(),
