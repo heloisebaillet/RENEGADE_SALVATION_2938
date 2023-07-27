@@ -14,7 +14,7 @@ class ForgetPasswordController extends Controller
 {
     function forgetPassword()
     {
-        return view('forget-password');
+        return redirect()->to(route('forget-password'));
     }
 
     function forgetPasswordPost(Request $request)
@@ -41,7 +41,7 @@ class ForgetPasswordController extends Controller
 
     function resetPassword($token)
     {
-        return view('reset-password', compact('token'));
+        return redirect()->to(route('reset-password', compact('token')));
     }
 
     function resetPasswordPost(Request $request)
