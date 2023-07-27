@@ -75,7 +75,6 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle/{id?}/', [BattleController::class, 'read'])
         ->name('battle.read');
-
 });
 
 /* Route du controller AuthController avec JWT  */
@@ -84,4 +83,5 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
+    Route::delete('delete', 'delete');
 });
