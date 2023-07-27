@@ -7,11 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class PlanetarySystem extends Model
 {
-    protected $table = 'planetary_systems'; // Nom de la table dans la base de données
+    protected $table = 'planetary_system';
+    protected $fillable = [
+        'name',
+        'x_coord',
+        'y_coord',
+    ];
 
-    protected $fillable = ['user_id', 'x_coord', 'y_coord']; // Colonnes pouvant être massivement assignées
-
-    // Définir la relation avec le modèle User si nécessaire
+    // Relation avec le modèle User pour récupérer le nom du système planétaire associé
     public function user()
     {
         return $this->belongsTo(User::class);

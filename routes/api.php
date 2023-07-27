@@ -7,11 +7,10 @@ use App\Http\Controllers\ShipsController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BattleController;
+use App\Http\Controllers\ForgetPasswordController;
 use App\Http\Controllers\ShipyardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +80,8 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle', [BattleController::class, 'read'])
         ->name('battle.read');
+        Route::post('/attack', [BattleController::class, 'attack'])
+        ->name('battle.attack');
     Route::get('/planetary-systems', [PlanetarySystemController::class, 'index1']);
 });
 
@@ -88,6 +89,21 @@ Route::middleware('jwt.verify')->group(function () {
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('register', 'register');
+
+    Route::match(['get', 'post'], 'update', 'updateProfile');
+    
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
+
+
+/* Route de Controller ForgetPassword */
+Route::get("/forget-password", [ForgetPasswordController::class, "forgetPassword"])
+    ->name('forget.password');
+Route::post("/forget-password", [ForgetPasswordController::class, "forgetPasswordPost"])
+    ->name('forget.password.post');
+Route::get("/reset-password/{token}", [ForgetPasswordController::class, "resetPassword"])
+    ->name('reset.password');
+Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost'])
+    ->name('reset.password.post');
+

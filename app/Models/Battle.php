@@ -2,23 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Battle extends Model
 {
-    use HasFactory;
-
+    protected $table = 'battles';
     protected $fillable = [
-        'user_id',
+        'uuid',
         'type',
-        'quantity',
-        'attacker_id',
-        'defender_id',
+        'user_id',
+        'pt_loose',
+        'loose_ships'
     ];
 
-    public function user()
+    public function winnerResources()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Resource::class, 'winner_id', 'planet_id');
+    }
+
+    public function loserResources()
+    {
+        return $this->belongsTo(Resource::class, 'loser_id', 'planet_id');
     }
 }
