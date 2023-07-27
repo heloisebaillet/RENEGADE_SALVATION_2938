@@ -17,8 +17,8 @@ return new class extends Migration
         });
     }
 
-    public function down()
-    {
-        Schema::dropIfExists('password_resets');
-    }
+    // public function down()
+    // {
+    //     Schema::dropIfExists('password_resets');
+    // }
 };

@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
-class ForgetPasswordManager extends Controller
+class ForgetPasswordController extends Controller
 {
     function forgetPassword()
     {
@@ -28,7 +28,7 @@ class ForgetPasswordManager extends Controller
         DB::table('password_resets')->insert([
             'email' => $request->email,
             'token' => $token,
-            'timestamp' => Carbon::now()
+            'created_at' => Carbon::now()
         ]);
 
         Mail::send("emails.forget-password", ['token' => $token], function ($message) use ($request) {
@@ -63,7 +63,7 @@ class ForgetPasswordManager extends Controller
                 ->with('error', 'Invalid');
         }
 
-        Auth::where('email', $request->email)->update([
+        User::where('email', $request->email)->update([
             'password' => Hash::make($request->password)
         ]);
 
