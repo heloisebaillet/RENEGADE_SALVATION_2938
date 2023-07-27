@@ -37,18 +37,11 @@ class ForgetPasswordController extends Controller
         });
 
         return response()->json(['status' => 'success', 'message' => 'We have sent you an e-mail to reset your password.']);
-
-        if ('success') {
-            function resetPassword($token)
-            {
-                return redirect('http://localhost:5173/reset-password', compact('token'));
-            }
-        }
     }
 
     function resetPassword($token)
     {
-        return redirect('reset-password/', compact('token'));
+        return redirect('reset-password', compact('token'));
     }
 
     function resetPasswordPost(Request $request)
@@ -56,7 +49,8 @@ class ForgetPasswordController extends Controller
         $request->validate([
             'email' => "required|email|exists:users",
             'password' => "required|string|min:4|confirmed",
-            'password_confirmation' => "required"
+            'password_confirmation' => "required",
+            'token' => "required"
         ]);
 
         $updatePassword = DB::table('password_resets')
