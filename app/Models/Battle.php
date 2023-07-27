@@ -8,12 +8,11 @@ class Battle extends Model
 {
     protected $table = 'battles';
     protected $fillable = [
-        'ships_id',
-        'attacker_id',
-        'defender_id',
-        'ttl_att_pts',
-        'ttl_def_pts',
-        'resources_looted'
+        'uuid',
+        'type',
+        'user_id',
+        'pt_loose',
+        'loose_ships'
     ];
 
     public function winnerResources()
