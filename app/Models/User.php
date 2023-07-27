@@ -12,7 +12,7 @@ use Illuminate\Contracts\Auth\CanResetPassword;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, MustVerifyEmail, CanResetPassword;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
