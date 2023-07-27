@@ -1,26 +1,19 @@
 <?php
+// PlanetarySystem.php (modèle Eloquent)
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PlanetarySystem extends Model
-
 {
+    protected $table = 'planetary_systems'; // Nom de la table dans la base de données
 
-    use HasFactory;
+    protected $fillable = ['user_id', 'x_coord', 'y_coord']; // Colonnes pouvant être massivement assignées
 
-    protected $table = 'planetary_system';
-    protected $fillable = [
-        'name',
-        'x_coord',
-        'y_coord',
-    ];
-
-    public function user(): BelongsTo
+    // Définir la relation avec le modèle User si nécessaire
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class);
     }
 }
