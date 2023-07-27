@@ -31,7 +31,7 @@ class BattleController extends Controller
         return (string) Uuid::uuid4();
     }
 
-    private function computeAttackRound($user_id, $defender_id, &$att, $battle_uuid)
+    private function computeAttackRound($user_id, $defender_id, &$att, $battle_uuid): bool
     {
         Log::info($att);
         $nb_att = $att['nb_fighter'] + $att['nb_frigate'] + $att['nb_cruiser'] + $att['nb_destroyer'];
@@ -42,13 +42,16 @@ class BattleController extends Controller
         $pt_att_cruiser = (($att['nb_cruiser'] * 9) * (mt_rand(500, 1500) / 1000));
         $pt_att_destroyer = (($att['nb_destroyer'] * 20) * (mt_rand(500, 1500) / 1000));
         $total_pt_att = ($pt_att_fighter + $pt_att_frigate + $pt_att_cruiser + $pt_att_destroyer);
-        Log::info("total des points de l'attanquant = ".$total_pt_att);
+        Log::info("total des points de l'attanquant = " . $total_pt_att);
+
         $pt_def_fighter = (($att['nb_def_fighter'] * 5) * (mt_rand(500, 1500) / 1000));
         $pt_def_frigate = (($att['nb_def_frigate'] * 7) * (mt_rand(500, 1500) / 1000));
         $pt_def_cruiser = (($att['nb_def_cruiser'] * 9) * (mt_rand(500, 1500) / 1000));
         $pt_def_destroyer = (($att['nb_def_destroyer'] * 20) * (mt_rand(500, 1500) / 1000));
         $total_pt_def = ($pt_def_fighter + $pt_def_frigate + $pt_def_cruiser  + $pt_def_destroyer);
-        Log::info("total des points de la défense = ".$total_pt_def);
+
+        Log::info("total des points de la défense = " . $total_pt_def);
+
         // Attaquant gagnant
         if ($total_pt_att > $total_pt_def) {
             $this->computeRound(
@@ -86,6 +89,13 @@ class BattleController extends Controller
                 $battle_uuid
             );
         }
+        if ($nb_att <= 0 || $nb_def <= 0) {
+            // Envoi du signal que la bataille est terminée.
+            return true;
+        }
+
+        // Si la bataille n'est pas terminée
+        return false;
     }
 
     private function recordBattle($uuid, $id, $type, $pt_loose, $loose_ships)
@@ -99,84 +109,77 @@ class BattleController extends Controller
         $battle->save();
     }
 
-    private function computeRound(
-        $id,
-        $looted_total,
-        &$att,
-        $isDefender,
-        $battle_uuid
-    ) {
-        /*
-        $att['nb_def_fighter'],
-        $att['nb_def_frigate'],
-        $att['nb_def_cruiser'],
-        $att['nb_def_destroyer'],
-        $att['nb_fighter'],
-        $att['nb_frigate'],
-        $att['nb_cruiser'],
-        $att['nb_destroyer'],
-        */
+    private function computeRound($id, $loose_total, &$att, $isDefender, $battle_uuid)
+    {
         $nb_fighters = $isDefender ? $att['nb_def_fighter'] : $att['nb_fighter'];
         $nb_frigates = $isDefender ? $att['nb_def_frigate'] : $att['nb_frigate'];
         $nb_cruisers = $isDefender ? $att['nb_def_cruiser'] : $att['nb_cruiser'];
         $nb_destroyers = $isDefender ? $att['nb_def_destroyer'] : $att['nb_destroyer'];
 
-        $looted = $looted_total;
+        $loose_ships = $loose_total;
+
         $att_fighters = Ship::where('user_id', $id)->where('type', 'fighter')->first();
-        if ($nb_fighters < $looted) {
-            $att_fighters->quantity = $att_fighters->quantity - $nb_fighters < 0 ? 0 : $att_fighters->quantity - $nb_fighters;
+        if ($nb_fighters < $loose_ships && $nb_fighters != 0) {
+            $att_fighters->quantity = $att_fighters->quantity - $nb_fighters;
             $att_fighters->save();
-            $looted = $looted - $nb_fighters;
-            $isDefender ? $att['nb_def_fighter'] = $att_fighters->quantity : $att['nb_fighter'] = $att_fighters->quantity;
-            $this->recordBattle($battle_uuid, $id, "fighter", $looted, $att_fighters->quantity);
+            $loose_ships = $loose_ships - $nb_fighters;
+            $isDefender ? $att['nb_def_fighter'] = $att_fighters->quantity - $nb_fighters : $att['nb_fighter'] = $att_fighters->quantity - $nb_fighters;
+            $this->recordBattle($battle_uuid, $id, "fighter", $loose_ships, $nb_fighters);
         } else {
-            $att_fighters->quantity = $att_fighters->quantity - $looted < 0 ? 0 : $att_fighters->quantity - $looted;
+            $att_fighters->quantity = max($att_fighters->quantity - $loose_ships, 0);
+            $nb_fighters = $att_fighters->quantity;
             $isDefender ? $att['nb_def_fighter'] = $att_fighters->quantity : $att['nb_fighter'] = $att_fighters->quantity;
             $att_fighters->save();
-            $this->recordBattle($battle_uuid, $id, "fighter", $looted, $att_fighters->quantity);
+            $this->recordBattle($battle_uuid, $id, "fighter", $loose_ships, $att_fighters->quantity);
             return;
         }
+
         $att_frigates = Ship::where('user_id', $id)->where('type', 'frigate')->first();
-        if ($nb_frigates < $looted) {
-            $att_frigates->quantity = $att_frigates->quantity - $nb_frigates < 0 ? 0 : $att_frigates->quantity - $nb_frigates;
+        
+        if ($nb_frigates < $loose_ships && $nb_frigates != 0) {
+            $att_frigates->quantity = $att_frigates->quantity - $nb_frigates;
             $att_frigates->save();
-            $looted = $looted - $nb_frigates;
-            $isDefender ? $att['nb_def_frigate']  = $att_frigates->quantity : $att['nb_frigate'] = $att_frigates->quantity;
-            $this->recordBattle($battle_uuid, $id, "frigate", $looted, $att_frigates->quantity);
+            $loose_ships = $loose_ships - $nb_frigates;
+            $isDefender ? $att['nb_def_frigate'] = $att_frigates->quantity - $nb_frigates : $att['nb_frigate'] = $att_frigates->quantity - $nb_frigates;
+            $this->recordBattle($battle_uuid, $id, "frigate", $loose_ships, $att_frigates->quantity);
         } else {
-            $att_frigates->quantity = $att_frigates->quantity - $looted < 0 ? 0 : $att_frigates->quantity - $looted;
+            $att_frigates->quantity = max($att_frigates->quantity - $loose_ships, 0);
             $nb_frigates = $att_frigates->quantity;
             $isDefender ? $att['nb_def_frigate']  = $att_frigates->quantity : $att['nb_frigate'] = $att_frigates->quantity;
             $att_frigates->save();
-            $this->recordBattle($battle_uuid, $id, "frigate", $looted, $att_frigates->quantity);
+            $this->recordBattle($battle_uuid, $id, "frigate", $loose_ships, $att_frigates->quantity);
             return;
         }
+
         $att_cruisers = Ship::where('user_id', $id)->where('type', 'cruiser')->first();
-        if ($nb_cruisers < $looted) {
-            $att_cruisers->quantity = $att_cruisers->quantity - $nb_cruisers < 0 ? 0 : $att_cruisers->quantity - $nb_cruisers;
+        if ($nb_cruisers < $loose_ships && $nb_cruisers != 0) {
+            $att_cruisers->quantity = $att_cruisers->quantity - $nb_cruisers;
             $att_cruisers->save();
-            $looted = $looted - $nb_cruisers;
-            $isDefender ? $att['nb_def_cruiser'] = $att_cruisers->quantity : $att['nb_cruiser'] = $att_cruisers->quantity;
-            $this->recordBattle($battle_uuid, $id, "cruisier", $looted, $att_cruisers->quantity);
+            $loose_ships = $loose_ships - $nb_cruisers;
+            $isDefender ? $att['nb_def_cruiser'] = $att_cruisers->quantity - $nb_cruisers : $att['nb_cruiser'] = $att_cruisers->quantity - $nb_cruisers;
+            $this->recordBattle($battle_uuid, $id, "cruiser", $loose_ships, $att_cruisers->quantity);
         } else {
-            $att_cruisers->quantity = $att_cruisers->quantity - $looted < 0 ? 0 : $att_cruisers->quantity - $looted;
-            $isDefender ? $att['nb_def_cruiser'] = $att_cruisers->quantity : $att['nb_cruiser'] = $att_cruisers->quantity;
+            $att_cruisers->quantity = max($att_cruisers->quantity - $loose_ships, 0);
+            $nb_cruisers = $att_cruisers->quantity;
+            $isDefender ? $att['nb_def_cruiser']  = $att_cruisers->quantity : $att['nb_cruiser'] = $att_cruisers->quantity;
             $att_cruisers->save();
-            $this->recordBattle($battle_uuid, $id, "cruisier", $looted, $att_cruisers->quantity);
+            $this->recordBattle($battle_uuid, $id, "cruiser", $loose_ships, $att_cruisers->quantity);
             return;
         }
+
         $att_destroyers = Ship::where('user_id', $id)->where('type', 'destroyer')->first();
-        if ($nb_destroyers < $looted) {
-            $att_destroyers->quantity = $att_destroyers->quantity - $nb_destroyers < 0 ? 0 : $att_destroyers->quantity - $nb_destroyers;
+        if ($nb_destroyers < $loose_ships && $nb_destroyers != 0) {
+            $att_destroyers->quantity = $att_destroyers->quantity - $nb_destroyers;
             $att_destroyers->save();
-            $looted = $looted - $nb_destroyers;
-            $isDefender ? $att['nb_def_destroyer'] = $att_destroyers->quantity : $att['nb_destroyer'] = $att_destroyers->quantity;
-            $this->recordBattle($battle_uuid, $id, "destroyer", $looted, $att_destroyers->quantity);
+            $loose_ships = $loose_ships - $nb_destroyers;
+            $isDefender ? $att['nb_def_destroyer'] = $att_destroyers->quantity - $nb_destroyers : $att['nb_destroyer'] = $att_destroyers->quantity - $nb_destroyers;
+            $this->recordBattle($battle_uuid, $id, "destroyer", $loose_ships, $att_destroyers->quantity);
         } else {
-            $att_destroyers->quantity = $att_destroyers->quantity - $looted < 0 ? 0 : $att_destroyers->quantity - $looted;
-            $isDefender ? $att['nb_def_destroyer'] = $att_destroyers->quantity : $att['nb_destroyer'] = $att_destroyers->quantity;
+            $att_destroyers->quantity = max($att_destroyers->quantity - $loose_ships, 0);
+            $nb_destroyers = $att_destroyers->quantity;
+            $isDefender ? $att['nb_def_cruiser']  = $att_destroyers->quantity : $att['nb_cruiser'] = $att_destroyers->quantity;
             $att_destroyers->save();
-            $this->recordBattle($battle_uuid, $id, "destroyer", $looted, $att_destroyers->quantity);
+            $this->recordBattle($battle_uuid, $id, "cruiser", $loose_ships, $att_destroyers->quantity);
             return;
         }
     }
@@ -209,19 +212,32 @@ class BattleController extends Controller
         $att['nb_def_frigate'] = intval($nb_def_frigates->quantity);
         $att['nb_def_cruiser'] = intval($nb_def_cruisers->quantity);
         $att['nb_def_destroyer'] = intval($nb_def_destroyers->quantity);
-        // nombre engagé dans la bataille
-        $nb_att_ref = $att['nb_fighter'] + $att['nb_frigate'] + $att['nb_cruiser'] + $att['nb_destroyer'];
-        
-        $cursor_zero_att = Ship::where('user_id', $user_id)->sum('quantity') - $nb_att_ref;
-        
 
-        $nb_def = Ship::where('user_id', $request->defender_id)->sum('quantity');
-        do {
-            $this->computeAttackRound($user_id, $request->defender_id, $att, $battle_uuid);
-            $nb_att = Ship::where('user_id', $user_id)->sum('quantity');
-            $nb_def = Ship::where('user_id', $request->defender_id)->sum('quantity');
+        // nombre engagé dans la bataille
+        $nb_att = $att['nb_fighter'] + $att['nb_frigate'] + $att['nb_cruiser'] + $att['nb_destroyer'];
+        $nb_def = $att['nb_def_fighter'] + $att['nb_def_frigate'] + $att['nb_def_cruiser'] + $att['nb_def_destroyer'];
+        $total_ships_user_id = Ship::where('user_id', $user_id)->sum('quantity');
+
+
+        // Boucle de bataille
+        $nb_att = $att['nb_fighter'] + $att['nb_frigate'] + $att['nb_cruiser'] + $att['nb_destroyer'];
+        $nb_def = $att['nb_def_fighter'] + $att['nb_def_frigate'] + $att['nb_def_cruiser'] + $att['nb_def_destroyer'];
+
+        $rounds = 0;
+        while ($nb_att > 0 && $nb_def > 0) {
+            $battleEnded = $this->computeAttackRound($user_id, $request->defender_id, $att, $battle_uuid);
+            $nb_att = $att['nb_fighter'] + $att['nb_frigate'] + $att['nb_cruiser'] + $att['nb_destroyer'];
+            $nb_def = $att['nb_def_fighter'] + $att['nb_def_frigate'] + $att['nb_def_cruiser'] + $att['nb_def_destroyer'];
+
             Log::info('nb_att = ' . $nb_att . ' nb_def = ' . $nb_def);
-        } while ($nb_att > $cursor_zero_att && $nb_def > 0);
+
+            // Vérifier si la bataille est terminée
+            if ($battleEnded || $rounds >= 100) { // Add a maximum number of rounds to prevent infinite loops
+                break;
+            }
+
+            $rounds++;
+        }
 
 
         return response()->json([
@@ -230,6 +246,8 @@ class BattleController extends Controller
             'attack_ship_count' => $nb_att,
             'defender_ship_count' => $nb_def,
         ]);
+
+
         // // Round  1 Fighter
         // if ($pt_att_fighter > $pt_def_fighter) {
         //     $reductionfighter = $nb_def_fighters->quantity * 0.3;
