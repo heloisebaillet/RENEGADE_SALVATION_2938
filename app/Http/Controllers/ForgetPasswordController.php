@@ -37,11 +37,18 @@ class ForgetPasswordController extends Controller
         });
 
         return response()->json(['status' => 'success', 'message' => 'We have sent you an e-mail to reset your password.']);
+
+        if ('success') {
+            function resetPassword($token)
+            {
+                return redirect('http://localhost:5173/reset-password', compact('token'));
+            }
+        }
     }
 
     function resetPassword($token)
     {
-        return redirect()->to(route('reset-password', compact('token')));
+        return redirect('reset-password/', compact('token'));
     }
 
     function resetPasswordPost(Request $request)
