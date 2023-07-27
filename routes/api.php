@@ -80,7 +80,7 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle', [BattleController::class, 'read'])
         ->name('battle.read');
-        Route::post('/attack', [BattleController::class, 'attack'])
+    Route::post('/attack', [BattleController::class, 'attack'])
         ->name('battle.attack');
     Route::get('/planetary-systems', [PlanetarySystemController::class, 'index1']);
 });
@@ -91,7 +91,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
 
     Route::match(['get', 'post'], 'update', 'updateProfile');
-    
+
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
@@ -106,4 +106,3 @@ Route::get("/reset-password/{token}", [ForgetPasswordController::class, "resetPa
     ->name('reset.password');
 Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost'])
     ->name('reset.password.post');
-
