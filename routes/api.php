@@ -7,11 +7,10 @@ use App\Http\Controllers\ShipsController;
 use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BattleController;
+use App\Http\Controllers\ForgetPasswordController;
 use App\Http\Controllers\ShipyardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -96,4 +95,14 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
+
+/* Route de Controller ForgetPassword */
+Route::get("/forget-password", [ForgetPasswordController::class, "forgetPassword"])
+    ->name('forget.password');
+Route::post("/forget-password", [ForgetPasswordController::class, "forgetPasswordPost"])
+    ->name('forget.password.post');
+Route::get("/reset-password/{token}", [ForgetPasswordController::class, "resetPassword"])
+    ->name('reset.password');
+Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost'])
+    ->name('reset.password.post');
 

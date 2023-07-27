@@ -42,13 +42,13 @@ class BattleController extends Controller
         $pt_att_cruiser = (($att['nb_cruiser'] * 9) * (mt_rand(500, 1500) / 1000));
         $pt_att_destroyer = (($att['nb_destroyer'] * 20) * (mt_rand(500, 1500) / 1000));
         $total_pt_att = ($pt_att_fighter + $pt_att_frigate + $pt_att_cruiser + $pt_att_destroyer);
-        Log::info("total des points de l'attanquant = ".$total_pt_att);
+        Log::info("total des points de l'attanquant = " . $total_pt_att);
         $pt_def_fighter = (($att['nb_def_fighter'] * 5) * (mt_rand(500, 1500) / 1000));
         $pt_def_frigate = (($att['nb_def_frigate'] * 7) * (mt_rand(500, 1500) / 1000));
         $pt_def_cruiser = (($att['nb_def_cruiser'] * 9) * (mt_rand(500, 1500) / 1000));
         $pt_def_destroyer = (($att['nb_def_destroyer'] * 20) * (mt_rand(500, 1500) / 1000));
         $total_pt_def = ($pt_def_fighter + $pt_def_frigate + $pt_def_cruiser  + $pt_def_destroyer);
-        Log::info("total des points de la défense = ".$total_pt_def);
+        Log::info("total des points de la défense = " . $total_pt_def);
         // Attaquant gagnant
         if ($total_pt_att > $total_pt_def) {
             $this->computeRound(
@@ -211,9 +211,9 @@ class BattleController extends Controller
         $att['nb_def_destroyer'] = intval($nb_def_destroyers->quantity);
         // nombre engagé dans la bataille
         $nb_att_ref = $att['nb_fighter'] + $att['nb_frigate'] + $att['nb_cruiser'] + $att['nb_destroyer'];
-        
+
         $cursor_zero_att = Ship::where('user_id', $user_id)->sum('quantity') - $nb_att_ref;
-        
+
 
         $nb_def = Ship::where('user_id', $request->defender_id)->sum('quantity');
         do {
