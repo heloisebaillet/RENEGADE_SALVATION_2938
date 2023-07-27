@@ -13,4 +13,10 @@ class PlanetarySystem extends Model
         'x_coord',
         'y_coord',
     ];
+
+    // Relation avec le modèle User pour récupérer le nom du système planétaire associé
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

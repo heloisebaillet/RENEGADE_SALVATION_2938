@@ -46,7 +46,7 @@ Route::middleware('jwt.verify')->group(function () {
     /* Routes des Vaisseaux */
     Route::put('/ships/{type}/{operand}/{nbr_minus?}', [ShipsController::class, 'update'])
         ->name('ships.update');
-    Route::get('/ships/', [ShipsController::class, 'read'])
+    Route::get('/ships', [ShipsController::class, 'read'])
         ->name('ships.read');
     /* Routes des Shipyard */
     Route::get('/shipyard/', [ShipyardController::class, 'read'])
@@ -78,8 +78,11 @@ Route::middleware('jwt.verify')->group(function () {
     /* Route des battles */
     Route::post('/battle/{id?}', [BattleController::class, 'create'])
         ->name('battle.create');
-    Route::get('/battle/{id?}/', [BattleController::class, 'read'])
+    Route::get('/battle', [BattleController::class, 'read'])
         ->name('battle.read');
+        Route::post('/attack', [BattleController::class, 'attack'])
+        ->name('battle.attack');
+    Route::get('/planetary-systems', [PlanetarySystemController::class, 'index1']);
 });
 
 /* Route du controller AuthController avec JWT  */
@@ -92,6 +95,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
 });
+
 
 /* Route de Controller ForgetPassword */
 Route::get("/forget-password", [ForgetPasswordController::class, "forgetPassword"])

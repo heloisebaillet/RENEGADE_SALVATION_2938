@@ -15,4 +15,3 @@ class Ship extends Model
         'user_id'
     ];
 }
-
