@@ -96,6 +96,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 });
 
+
 /* Route de Controller ForgetPassword */
 Route::get("/forget-password", [ForgetPasswordController::class, "forgetPassword"])
     ->name('forget.password');
