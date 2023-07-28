@@ -112,11 +112,13 @@ class BattleController extends Controller
 
         if ($nb_fighters < $loose_ships) {
             $model->nb_fighter = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_fighters;
             $this->recordBattle($model->uuid, $model->user_id, "fighter", $loose_ships, $model->nb_fighter);
         } else {
             $model->nb_fighter = $model->nb_fighter - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "fighter", $loose_ships, $model->nb_fighter);
             return;
@@ -124,11 +126,13 @@ class BattleController extends Controller
 
         if ($nb_frigates < $loose_ships) {
             $model->nb_frigate = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_frigates;
             $this->recordBattle($model->uuid, $model->user_id, "frigate", $loose_ships, $model->nb_frigate);
         } else {
             $model->nb_frigate = $model->nb_frigate - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "frigate", $loose_ships, $model->nb_frigate);
             return;
@@ -136,11 +140,13 @@ class BattleController extends Controller
 
         if ($nb_cruisers < $loose_ships) {
             $model->nb_cruiser = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_cruisers;
             $this->recordBattle($model->uuid, $model->user_id, "cruiser", $loose_ships, $model->nb_cruiser);
         } else {
             $model->nb_cruiser = $model->nb_cruiser - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "cruiser", $loose_ships, $model->nb_cruiser);
             return;
@@ -148,11 +154,13 @@ class BattleController extends Controller
 
         if ($nb_destroyers < $loose_ships) {
             $model->nb_destroyer = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_destroyers;
             $this->recordBattle($model->uuid, $model->user_id, "destroyer", $loose_ships, $model->nb_destroyer);
         } else {
             $model->nb_destroyer = $model->nb_destroyer - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "destroyer", $loose_ships, $model->nb_destroyer);
             return;
@@ -165,10 +173,11 @@ class BattleController extends Controller
         return $round->nb_fighter + $round->nb_frigate + $round->nb_cruiser + $round->nb_destroyer;
     }
 
-    private function updateResults($user_id, $roundValue, $type) {
+    private function updateResults($user_id, $roundValue, $type)
+    {
         $ship = Ship::where('user_id', $user_id)
-        ->where('type', $type)
-        ->first();
+            ->where('type', $type)
+            ->first();
         $ship->quantity =  $ship->quantity -  $roundValue;
         $ship->save();
     }
