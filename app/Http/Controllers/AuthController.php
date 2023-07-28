@@ -208,4 +208,11 @@ class AuthController extends Controller
             ]
         ]);
     }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+
+        return redirect()->route('index')->with('success', '✔️ User successfully deleted.');
+    }
 }
