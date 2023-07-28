@@ -29,7 +29,8 @@ class ShipsController extends Controller
             'cruiser' => $cruiser,
             'destroyer' => $destroyer,
         ];
-        return response()->json($response, 200);}
+        return response()->json($response, 200);
+    }
     public function Update(Request $request, $type = null, $operand = null, $nbr_minus = null)
     {
         $user_id = Auth::User()->id;
