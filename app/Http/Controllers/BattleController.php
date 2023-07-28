@@ -54,9 +54,7 @@ class BattleController extends Controller
         $pt_def_cruiser = (($defender->nb_cruiser * 9) * $rnd_def);
         $pt_def_destroyer = (($defender->nb_destroyer * 20) * $rnd_def);
         $total_pt_def = ($pt_def_fighter + $pt_def_frigate + $pt_def_cruiser  + $pt_def_destroyer);
-
         Log::info("total des points de la défense = " . $total_pt_def);
-
         // Attaquant gagnant
         if ($total_pt_att > $total_pt_def) {
             // Attaquant remporte le round
@@ -253,8 +251,6 @@ class BattleController extends Controller
             'attack_ship_count' => $nb_att,
             'defender_ship_count' => $nb_def,
         ]);
-
-
         // // Round  1 Fighter
         // if ($pt_att_fighter > $pt_def_fighter) {
         //     $reductionfighter = $nb_def_fighters->quantity * 0.3;
