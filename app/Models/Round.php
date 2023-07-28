@@ -15,7 +15,8 @@ class Round extends Model
         'nb_fighter',
         'nb_frigate',
         'nb_cruiser',
-        'nb_destroyer'
+        'nb_destroyer',
+        'nb_round'
     ];
 
 
