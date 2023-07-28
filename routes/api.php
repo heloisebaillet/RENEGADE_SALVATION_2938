@@ -8,6 +8,7 @@ use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BattleController;
 use App\Http\Controllers\ForgetPasswordController;
+use App\Http\Controllers\RoundController;
 use App\Http\Controllers\ShipyardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +64,10 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('ressources.read');
     Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
         ->name('ressources.update');
+
+    /* Route du controller RjoundController*/
+    Route::get("/round", [RoundController::class, "read"]);
+
 
     /* Routes des entrepôts */
     /* Désactivation de la route create

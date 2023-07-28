@@ -16,7 +16,9 @@ return new class extends Migration
             $table->increments('id');
             $table->string('uuid',100);
             $table->integer('user_id');
+            $table->string('planetary_system_name')->nullable();
             $table->boolean('is_defender');
+            $table->boolean('is_winner');
             $table->integer('nb_fighter');
             $table->integer('nb_frigate');
             $table->integer('nb_cruiser');

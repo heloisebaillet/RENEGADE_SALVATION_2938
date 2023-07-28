@@ -6,6 +6,7 @@ use App\Models\Battle;
 use App\Models\Round;
 use App\Models\PlanetarySystem;
 use App\Models\Ship;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -164,7 +165,15 @@ class BattleController extends Controller
             return;
         }
     }
-
+    private function isWinner($round)
+    {
+        if ($round->nb_fighter +  $round->nb_frigate + $round->nb_cruiser + $round->nb_destroyer  == "0") {
+            $round->is_winner = true;
+        } else {
+            $round->is_winner = false;
+        }
+        $round->save();
+    }
     private function getNb($battleUuid, $id)
     {
         $round = Round::where('uuid', $battleUuid)->where('user_id', $id)->first();
@@ -193,6 +202,10 @@ class BattleController extends Controller
         //données de l'attaquant (nous)
         $user_id =  Auth::id();
         $battle_uuid = $this->newUniqueId();
+
+        //planete du défendeur
+        $defender_planet_name = User::select('planetary_system_name')->where('id', $request->defender_id)->first();
+
         // calcule système de combat
 
         $nb_def_fighters = Ship::where('user_id', $request->defender_id)->where('type', 'fighter')->first();
@@ -208,6 +221,7 @@ class BattleController extends Controller
             'uuid' => $battle_uuid,
             'user_id' => $user_id,
             'is_defender' => false,
+            'planetary_system_name' => $defender_planet_name->planetary_system_name,
             'nb_fighter' => intval($request->nb_fighter),
             'nb_frigate' => intval($request->nb_frigate),
             'nb_cruiser' => intval($request->nb_cruiser),
@@ -233,12 +247,14 @@ class BattleController extends Controller
         }
         // Mise a jour table de données
         $round = Round::where('uuid', $battle_uuid)->where('user_id', $user_id)->first();
+        $this->isWinner($round);
         $this->updateResults($user_id, $request->nb_fighter - $round->nb_fighter, 'fighter');
         $this->updateResults($user_id, $request->nb_frigate - $round->nb_frigate, 'frigate');
         $this->updateResults($user_id, $request->nb_cruiser - $round->nb_cruiser, 'cruiser');
         $this->updateResults($user_id, $request->nb_destroyer - $round->nb_destroyer, 'destroyer');
 
         $round = Round::where('uuid', $battle_uuid)->where('user_id', $request->defender_id)->first();
+        $this->isWinner($round);
         $this->updateResults($request->defender_id, $nb_def_fighters->quantity - $round->nb_fighter, 'fighter');
         $this->updateResults($request->defender_id, $nb_def_frigates->quantity - $round->nb_frigate, 'frigate');
         $this->updateResults($request->defender_id, $nb_def_cruisers->quantity - $round->nb_cruiser, 'cruiser');
