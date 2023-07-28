@@ -12,16 +12,24 @@ class PlanetarySystemController extends Controller
 
     public function index1()
     {
-
         $user_id = Auth::User()->id;
-        $planetarySystems = PlanetarySystem::select('planetary_system.id', 'planetary_system.x_coord', 'planetary_system.y_coord', 'users.planetary_system_name')
+        $planetarySystems = PlanetarySystem::select('planetary_system.id', 'planetary_system.x_coord', 'planetary_system.y_coord', 'users.planetary_system_name', 'planetary_system.user_id')
             ->leftJoin('users', 'users.id', '=', 'planetary_system.user_id')
             ->get();
 
         return response()->json(['planetarySystems' => $planetarySystems], 200);
     }
 
+    // public function index2()
+    // {
+    //     $user_id = Auth::User()->id;
+    //     $planetarySystems = PlanetarySystem::select('planetary_system.id', 'planetary_system.x_coord', 'planetary_system.y_coord', 'users.planetary_system_name', 'planetary_system.user_id')
+    //         ->where('user_id', $user_id)
+    //         ->leftJoin('users', 'users.id', '=', 'planetary_system.user_id')
+    //         ->get();
 
+    //     return response()->json(['planetarySystems' => $planetarySystems], 200);
+    // }
 
     //public function create(Request $request)
     //{
