@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -41,17 +42,21 @@ class ForgetPasswordController extends Controller
 
     function resetPassword($token)
     {
-        return redirect()->route('reset-password', compact('token'));
+
+        return redirect('reset-password', compact('token'));
+
     }
 
     function resetPasswordPost(Request $request)
     {
-        $request->validate([
-            'email' => "required|email|exists:users",
-            'password' => "required|string|min:4|confirmed",
-            'passwordConfirmation' => "required|string|min:4|confirmed",
-            'token' => "required"
-        ]);
+
+        // $request->validate([
+        //     'email' => 'required|string|email|unique:users,email,' . Auth::user()->id,
+        //     'password' => "required|string|min:4|confirmed",
+        //     'passwordConfirmation' => "required",
+
+        // ]);
+      
 
 
         $updatePassword = DB::table('password_resets')
@@ -59,9 +64,11 @@ class ForgetPasswordController extends Controller
                 'email' => $request->email,
                 'token' => $request->token,
             ])->first();
-        var_dump($updatePassword);
+
         if (!$updatePassword) {
-            return response()->json(['status' => 'error', 'message' => 'Invalid'], 400);
+             return redirect()->to(route('reset.password'))
+                 ->with('error', 'Invalid');
+
         }
 
         User::where('email', $request->email)->update([
@@ -72,6 +79,9 @@ class ForgetPasswordController extends Controller
             'email' => $request->email
         ])->delete();
 
-        return response()->json(['status' => 'success', 'message' => 'Password reset successful']);
-    }
+
+        return response()->json([
+            'status' => 'success'
+        ]);    }
 }
+
