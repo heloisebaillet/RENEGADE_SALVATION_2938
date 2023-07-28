@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -41,26 +42,27 @@ class ForgetPasswordController extends Controller
 
     function resetPassword($token)
     {
-        return redirect()->to(route('reset-password', compact('token')));
+        return redirect('reset-password', compact('token'));
     }
 
     function resetPasswordPost(Request $request)
     {
-        $request->validate([
-            'email' => "required|email|exists:users",
-            'password' => "required|string|min:4|confirmed",
-            'password_confirmation' => "required"
-        ]);
+        // $request->validate([
+        //     'email' => 'required|string|email|unique:users,email,' . Auth::user()->id,
+        //     'password' => "required|string|min:4|confirmed",
+        //     'passwordConfirmation' => "required",
+
+        // ]);
+        
 
         $updatePassword = DB::table('password_resets')
             ->where([
                 'email' => $request->email,
                 'token' => $request->token
             ])->first();
-
         if (!$updatePassword) {
-            return redirect()->to(route('reset.password'))
-                ->with('error', 'Invalid');
+             return redirect()->to(route('reset.password'))
+                 ->with('error', 'Invalid');
         }
 
         User::where('email', $request->email)->update([
@@ -71,6 +73,7 @@ class ForgetPasswordController extends Controller
             'email' => $request->email
         ])->delete();
 
-        return redirect()->to(route('login'))->with('success', 'Password reset successfully');
-    }
+        return response()->json([
+            'status' => 'success'
+        ]);    }
 }
