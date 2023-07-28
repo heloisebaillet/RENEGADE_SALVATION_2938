@@ -5,21 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Ressources;
 use App\Models\Shipyard;
 use App\Models\Structure;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class StructureController extends Controller
-{   
-    
+{
+
     // creer un batiment par rapport a ses ressources et à son énergie
     public function create(Request $request, $type = null)
     {
         $user_id = Auth::user()->id;
         $level = "1";
         $ore = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
+        $showwarehouse = Warehouse::where('user_id', $user_id)->first();
+
         // A vérifier si l'utilisateur a assez d'énergie
-        if ($type == "mine" || $type == "raffinery" || $type == "powerplant" || $type == "shipyard") {
+        if ($type == "mine" || $type == "raffinery" || $type == "powerplant" || $type == "shipyard" || $type == "warehouse") {
             // Création d'une mine
             if ($type == "mine") {
                 if ($ore->quantity >= 300) {
@@ -85,6 +88,18 @@ class StructureController extends Controller
                     return Response()->json(['success' => 'false'], 423);
                 }
             }
+            if ($type == "warehouse") {
+                if ($ore->quantity >= 500) {
+                    $energy_consumption = "1";
+                    $showwarehouse->quantity =  $showwarehouse->quantity + 1;
+                    $showwarehouse->save();
+                    $ore->quantity = $ore->quantity - 500;
+                    $ore->save();
+                    return Response()->json($showwarehouse, 201);
+                } else {
+                    return Response()->json(['success' => 'false'], 423);
+                }
+            }
         } else {
             return Response()->json(['success' => 'false'], 423);
         }
@@ -130,7 +145,8 @@ class StructureController extends Controller
         }
     }
     public function delete(Request $request, $id = null)
-    {  $mine = 150;
+    {
+        $mine = 150;
         $raffinery = 150;
         $powerplant = 250;
         $shipyard = 500;
@@ -141,7 +157,7 @@ class StructureController extends Controller
         if ($type != "" && $user_id == $type->user_id) {
             $type->delete();
             // a mettre à jour par rapport aux types de suppression
-            $ore->quantity = $ore->quantity + $mine ;
+            $ore->quantity = $ore->quantity + $mine;
             $ore->save();
             return Response()->json(['success' => 'true'], 204);
         }
