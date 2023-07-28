@@ -9,10 +9,17 @@ use App\Models\Ship;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Warehouse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DeleteController;
+use Illuminate\Routing\Controller as RoutingController;
+use App\Models\Delete;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Redis;
+use Symfony\Component\HttpFoundation;
 
-class AuthController extends Controller
+class AuthController extends RoutingController
 {
 
     public function __construct()
@@ -164,26 +171,27 @@ class AuthController extends Controller
             ], 401);
         }
     }
-    public function updateProfile(Request $request)
+    public function update(Request $request)
     {
         $request->validate([
             'firstname' => 'required|string',
             'lastname' => 'required|string',
-            // vu que c'est unique, j'ajoute l'id pour exclure le user de la recherche d'unicité
-            //dans la table Users.
-            'email' => 'required|string|email|unique:users,email,' . Auth::user()->id,
+            'email' => 'required|string|email|unique:users',
             'password' => 'required|string',
-            'username' => 'required|string|unique:users,username,' . Auth::user()->id,
+            'username' => 'required|string|unique:users',
+            'date_of_birth' => 'required|date',
+            'name' => 'required|string',
             'picture' => 'required|string'
         ]);
 
         $update = User::find(Auth::user()->id);
-        $update->firstname = $request->input('firstname');
-        $update->lastname = $request->input('lastname');
-        $update->email = $request->input('email');
-        $update->password = Hash::make($request->input('password'));
-        $update->username = $request->input('username');
-        $update->picture = $request->input('picture');
+        $update->firstname = request('firstname');
+        $update->lastname = request('lastname');
+        $update->email = request('email');
+        $update->password = request('password');
+        $update->username = request('username');
+        $update->date_of_birth = request('date_of_birth');
+        $update->picture = request('pircture');
         $update->save();
         Auth::login($update);
 
@@ -196,7 +204,6 @@ class AuthController extends Controller
             ]
         ]);
     }
-
     public function refresh()
     {
         return response()->json([
@@ -204,6 +211,17 @@ class AuthController extends Controller
             'user' => Auth::user(),
             'authorisation' => [
                 'token' => Auth::refresh(),
+                'type' => 'bearer',
+            ]
+        ]);
+    }
+    public function destroy($user)
+    {
+        return response()->json([
+            'status' => 'success',
+            'user' => Auth::user(),
+            'authorisation' => [
+                'token' => Auth::delete(),
                 'type' => 'bearer',
             ]
         ]);

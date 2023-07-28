@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class DeleteController extends Controller
 {
+    function delete()
+    {
+    }
     public function deleteUser($id)
     {
         $user = User::find($id);
