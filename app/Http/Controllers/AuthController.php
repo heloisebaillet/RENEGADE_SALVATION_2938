@@ -18,6 +18,7 @@ use App\Models\Delete;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpFoundation;
+use Symfony\Component\HttpFoundation\RedirectResponse as HttpFoundationRedirectResponse;
 
 class AuthController extends RoutingController
 {
@@ -215,15 +216,31 @@ class AuthController extends RoutingController
             ]
         ]);
     }
-    public function destroy($user)
+    public function destroy(Request $request): HttpFoundationRedirectResponse
+
     {
-        return response()->json([
-            'status' => 'success',
-            'user' => Auth::user(),
-            'authorisation' => [
-                'token' => Auth::delete(),
-                'type' => 'bearer',
-            ]
+        $request->validateWithBag('userDeletion', [
+            'password' => ['required', 'current_password'],
         ]);
+
+        $user = $request->user();
+
+        Auth::logout();
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return Redirect::to('/');
     }
+    // return response()->json([
+    //    'status' => 'success',
+    //    'user' => Auth::user(),
+    //   'authorisation' => [
+    //         'token' => Auth::delete(),
+    //         'type' => 'bearer',
+    //      ]
+    //  ]);
+    // }
 }
