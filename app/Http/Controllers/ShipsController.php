@@ -17,19 +17,19 @@ class ShipsController extends Controller
     public function Read()
     {
         $user_id = Auth::User()->id;
-        $fighter = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'fighter')->first();
-        $frigate = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'frigate')->first();
-        $cruiser = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'cruiser')->first();
-        $destroyer = Ship::select('quantity')->where('user_id', $user_id)->where('type', 'destroyer')->first();
+        $fighter = Ship::where('user_id', $user_id)->where('type', 'fighter')->get();
+        $frigate = Ship::where('user_id', $user_id)->where('type', 'frigate')->get();
+        $cruiser = Ship::where('user_id', $user_id)->where('type', 'cruiser')->get();
+        $destroyer = Ship::where('user_id', $user_id)->where('type', 'destroyer')->get();
+
 
         $response = [
-            'fighter' => $fighter->quantity,
-            'frigate' => $frigate->quantity,
-            'cruiser' => $cruiser->quantity,
-            'destroyer' => $destroyer->quantity,
+            'fighter' => $fighter,
+            'frigate' => $frigate,
+            'cruiser' => $cruiser,
+            'destroyer' => $destroyer,
         ];
-
-        return response()->json(['status' => 'success', 'ships' => $response], 200);
+        return response()->json($response, 200);
     }
     public function Update(Request $request, $type = null, $operand = null, $nbr_minus = null)
     {
