@@ -41,7 +41,7 @@ class ForgetPasswordController extends Controller
 
     function resetPassword($token)
     {
-        return redirect()->to(route('reset-password', compact('token')));
+        return redirect()->route('reset-password', compact('token'));
     }
 
     function resetPasswordPost(Request $request)
@@ -49,18 +49,19 @@ class ForgetPasswordController extends Controller
         $request->validate([
             'email' => "required|email|exists:users",
             'password' => "required|string|min:4|confirmed",
-            'password_confirmation' => "required"
+            'passwordConfirmation' => "required|string|min:4|confirmed",
+            'token' => "required"
         ]);
+
 
         $updatePassword = DB::table('password_resets')
             ->where([
                 'email' => $request->email,
-                'token' => $request->token
+                'token' => $request->token,
             ])->first();
-
+        var_dump($updatePassword);
         if (!$updatePassword) {
-            return redirect()->to(route('reset.password'))
-                ->with('error', 'Invalid');
+            return response()->json(['status' => 'error', 'message' => 'Invalid'], 400);
         }
 
         User::where('email', $request->email)->update([
@@ -71,6 +72,6 @@ class ForgetPasswordController extends Controller
             'email' => $request->email
         ])->delete();
 
-        return redirect()->to(route('login'))->with('success', 'Password reset successfully');
+        return response()->json(['status' => 'success', 'message' => 'Password reset successful']);
     }
 }
