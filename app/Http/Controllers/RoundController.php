@@ -19,7 +19,10 @@ class RoundController extends Controller
 
         $uuid = $uuidObject->uuid;
 
-        $rounds = Round::where('uuid', $uuid)->get();
+        $rounds = Round::select('planetary_system_name', 'user_id','is_defender','nb_fighter','nb_frigate','nb_cruiser','nb_destroyer','nb_round','rounds.created_at')
+        ->where('uuid', $uuid)
+        ->leftJoin('users', 'users.id', '=', 'rounds.user_id')
+        ->get();
 
 
 
