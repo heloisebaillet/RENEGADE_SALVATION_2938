@@ -209,10 +209,14 @@ class AuthController extends Controller
         ]);
     }
 
-    public function destroy(User $user)
+    public function destroy()
     {
+        $id = Auth::user()->id;
+        $user = User::find($id);
         $user->delete();
 
-        return redirect()->route('index')->with('success', '✔️ User successfully deleted.');
+        return response()->json([
+            'status' => 'success'
+        ]);
     }
 }
