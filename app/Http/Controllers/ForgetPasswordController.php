@@ -44,7 +44,6 @@ class ForgetPasswordController extends Controller
     {
 
         return redirect('reset-password', compact('token'));
-
     }
 
     function resetPasswordPost(Request $request)
@@ -56,7 +55,7 @@ class ForgetPasswordController extends Controller
         //     'passwordConfirmation' => "required",
 
         // ]);
-      
+
 
 
         $updatePassword = DB::table('password_resets')
@@ -66,9 +65,8 @@ class ForgetPasswordController extends Controller
             ])->first();
 
         if (!$updatePassword) {
-             return redirect()->to(route('reset.password'))
-                 ->with('error', 'Invalid');
-
+            return redirect()->to(route('reset.password'))
+                ->with('error', 'Invalid');
         }
 
         User::where('email', $request->email)->update([
@@ -82,6 +80,6 @@ class ForgetPasswordController extends Controller
 
         return response()->json([
             'status' => 'success'
-        ]);    }
+        ]);
+    }
 }
-
