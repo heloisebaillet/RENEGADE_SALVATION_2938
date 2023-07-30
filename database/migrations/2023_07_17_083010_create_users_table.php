@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->increments('id')->foreign('battle_history.user_id');
+            $table->id();
             $table->string('planetary_system_name', 50)->foreign('planetary_system.user_id');
             $table->string('type_user', 50)->nullable();
             $table->string('firstname', 100);

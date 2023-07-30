@@ -9,6 +9,7 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BattleController;
 use App\Http\Controllers\DeleteController;
 use App\Http\Controllers\ForgetPasswordController;
+use App\Http\Controllers\RoundController;
 use App\Http\Controllers\ShipyardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +66,10 @@ Route::middleware('jwt.verify')->group(function () {
     Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
         ->name('ressources.update');
 
+    /* Route du controller RjoundController*/
+    Route::get("/round", [RoundController::class, "read"]);
+
+
     /* Routes des entrepôts */
     /* Désactivation de la route create
     /* Route::post('/warehouses/', [WarehouseController::class, 'create']) 
@@ -95,6 +100,8 @@ Route::controller(AuthController::class)->group(function () {
 
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
+
+    Route::delete('/delete/', 'destroy');
 });
 
 

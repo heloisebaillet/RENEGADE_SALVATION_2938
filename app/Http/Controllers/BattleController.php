@@ -6,8 +6,8 @@ use App\Models\Battle;
 use App\Models\Round;
 use App\Models\PlanetarySystem;
 use App\Models\Ship;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\Log;
@@ -54,9 +54,7 @@ class BattleController extends Controller
         $pt_def_cruiser = (($defender->nb_cruiser * 9) * $rnd_def);
         $pt_def_destroyer = (($defender->nb_destroyer * 20) * $rnd_def);
         $total_pt_def = ($pt_def_fighter + $pt_def_frigate + $pt_def_cruiser  + $pt_def_destroyer);
-
         Log::info("total des points de la défense = " . $total_pt_def);
-
         // Attaquant gagnant
         if ($total_pt_att > $total_pt_def) {
             // Attaquant remporte le round
@@ -112,11 +110,13 @@ class BattleController extends Controller
 
         if ($nb_fighters < $loose_ships) {
             $model->nb_fighter = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_fighters;
             $this->recordBattle($model->uuid, $model->user_id, "fighter", $loose_ships, $model->nb_fighter);
         } else {
             $model->nb_fighter = $model->nb_fighter - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "fighter", $loose_ships, $model->nb_fighter);
             return;
@@ -124,11 +124,13 @@ class BattleController extends Controller
 
         if ($nb_frigates < $loose_ships) {
             $model->nb_frigate = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_frigates;
             $this->recordBattle($model->uuid, $model->user_id, "frigate", $loose_ships, $model->nb_frigate);
         } else {
             $model->nb_frigate = $model->nb_frigate - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "frigate", $loose_ships, $model->nb_frigate);
             return;
@@ -136,11 +138,13 @@ class BattleController extends Controller
 
         if ($nb_cruisers < $loose_ships) {
             $model->nb_cruiser = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_cruisers;
             $this->recordBattle($model->uuid, $model->user_id, "cruiser", $loose_ships, $model->nb_cruiser);
         } else {
             $model->nb_cruiser = $model->nb_cruiser - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "cruiser", $loose_ships, $model->nb_cruiser);
             return;
@@ -148,27 +152,38 @@ class BattleController extends Controller
 
         if ($nb_destroyers < $loose_ships) {
             $model->nb_destroyer = 0;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $loose_ships = $loose_ships - $nb_destroyers;
             $this->recordBattle($model->uuid, $model->user_id, "destroyer", $loose_ships, $model->nb_destroyer);
         } else {
             $model->nb_destroyer = $model->nb_destroyer - $loose_ships;
+            $model->nb_round = $model->nb_round + 1;
             $model->save();
             $this->recordBattle($model->uuid, $model->user_id, "destroyer", $loose_ships, $model->nb_destroyer);
             return;
         }
     }
-
+    private function isWinner($round)
+    {
+        if ($round->nb_fighter +  $round->nb_frigate + $round->nb_cruiser + $round->nb_destroyer  == "0") {
+            $round->is_winner = false;
+        } else {
+            $round->is_winner = true;
+        }
+        $round->save();
+    }
     private function getNb($battleUuid, $id)
     {
         $round = Round::where('uuid', $battleUuid)->where('user_id', $id)->first();
         return $round->nb_fighter + $round->nb_frigate + $round->nb_cruiser + $round->nb_destroyer;
     }
 
-    private function updateResults($user_id, $roundValue, $type) {
+    private function updateResults($user_id, $roundValue, $type)
+    {
         $ship = Ship::where('user_id', $user_id)
-        ->where('type', $type)
-        ->first();
+            ->where('type', $type)
+            ->first();
         $ship->quantity =  $ship->quantity -  $roundValue;
         $ship->save();
     }
@@ -186,6 +201,10 @@ class BattleController extends Controller
         //données de l'attaquant (nous)
         $user_id =  Auth::id();
         $battle_uuid = $this->newUniqueId();
+
+        //planete du défendeur
+        $defender_planet_name = User::select('planetary_system_name')->where('id', $request->defender_id)->first();
+
         // calcule système de combat
 
         $nb_def_fighters = Ship::where('user_id', $request->defender_id)->where('type', 'fighter')->first();
@@ -201,6 +220,7 @@ class BattleController extends Controller
             'uuid' => $battle_uuid,
             'user_id' => $user_id,
             'is_defender' => false,
+            'planetary_system_name' => $defender_planet_name->planetary_system_name,
             'nb_fighter' => intval($request->nb_fighter),
             'nb_frigate' => intval($request->nb_frigate),
             'nb_cruiser' => intval($request->nb_cruiser),
@@ -226,12 +246,14 @@ class BattleController extends Controller
         }
         // Mise a jour table de données
         $round = Round::where('uuid', $battle_uuid)->where('user_id', $user_id)->first();
+        $this->isWinner($round);
         $this->updateResults($user_id, $request->nb_fighter - $round->nb_fighter, 'fighter');
         $this->updateResults($user_id, $request->nb_frigate - $round->nb_frigate, 'frigate');
         $this->updateResults($user_id, $request->nb_cruiser - $round->nb_cruiser, 'cruiser');
         $this->updateResults($user_id, $request->nb_destroyer - $round->nb_destroyer, 'destroyer');
 
         $round = Round::where('uuid', $battle_uuid)->where('user_id', $request->defender_id)->first();
+        $this->isWinner($round);
         $this->updateResults($request->defender_id, $nb_def_fighters->quantity - $round->nb_fighter, 'fighter');
         $this->updateResults($request->defender_id, $nb_def_frigates->quantity - $round->nb_frigate, 'frigate');
         $this->updateResults($request->defender_id, $nb_def_cruisers->quantity - $round->nb_cruiser, 'cruiser');
@@ -240,284 +262,10 @@ class BattleController extends Controller
 
         return response()->json([
             'defender_id' => $request->defender_id,
-            'user_id' => $user_id,
-            'attack_ship_count' => $nb_att,
-            'defender_ship_count' => $nb_def,
+            'planet_defender_system' => $defender_planet_name->planetary_system_name,
+            'attack_ship_remaining' => $nb_att,
+            'defender_ship_remaining' => $nb_def,
         ]);
-
-
-        // // Round  1 Fighter
-        // if ($pt_att_fighter > $pt_def_fighter) {
-        //     $reductionfighter = $nb_def_fighters->quantity * 0.3;
-        //     $newQuantity = $nb_def_fighters->quantity - $reductionfighter;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_def_fighters->quantity = $newQuantity;
-        //     $nb_def_fighters->save();
-        //     // Round  2 Fighter
-        //     if ($pt_att_fighter > $pt_def_frigate) {
-        //         $reductionfrigate = $nb_def_frigates->quantity * 0.3;
-        //         $newQuantity = $nb_def_frigates->quantity - $reductionfrigate;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_def_frigates->quantity = $newQuantity;
-        //         $nb_def_frigates->save();
-        //         // Round  3 Fighter
-        //         if ($pt_att_fighter > $pt_def_cruiser) {
-        //             $reductioncruiser = $nb_def_cruisers->quantity * 0.3;
-        //             $newQuantity = $nb_def_cruisers->quantity - $reductioncruiser;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_def_cruisers->quantity = $newQuantity;
-        //             $nb_def_cruisers->save();
-
-        //             // Round 4 Fighter
-        //             if ($pt_att_fighter > $pt_def_destroyer) {
-        //                 $reductiondestroyer = $nb_def_destroyers->quantity * 0.3;
-        //                 $newQuantity = $nb_def_destroyers->quantity - $reductiondestroyer;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_def_destroyers->quantity = $newQuantity;
-        //                 $nb_def_destroyers->save();
-        //                 $win_fighter = "attacker win";
-        //             } else {
-        //                 $win_fighter  = "round 4";
-        //                 $reductionfighter = $nb_att_fighters * 0.3;
-        //                 $newQuantity = $nb_att_fighters - $reductionfighter;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_att_fighters = $newQuantity;
-        //                 $att_fighters->quantity = $nb_att_fighters;
-        //                 $att_fighters->save();
-        //             }
-        //         } else {
-        //             $win_fighter  = "round 3";
-        //             $reductionfighter = $nb_att_fighters * 0.3;
-        //             $newQuantity = $nb_att_fighters - $reductionfighter;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_att_fighters = $newQuantity;
-        //             $att_fighters->quantity = $nb_att_fighters;
-        //             $att_fighters->save();
-        //         }
-        //     } else {
-        //         $win_fighter  = "round 2";
-        //         $reductionfighter = $nb_att_fighters * 0.3;
-        //         $newQuantity = $nb_att_fighters - $reductionfighter;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_att_fighters = $newQuantity;
-        //         $att_fighters->quantity = $nb_att_fighters;
-        //         $att_fighters->save();
-        //     }
-        // } else {
-        //     $win_fighter  = "round 1";
-        //     $reductionfighter = $nb_att_fighters * 0.3;
-        //     $newQuantity = $nb_att_fighters - $reductionfighter;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_att_fighters = $newQuantity;
-        //     $att_fighters->quantity = $nb_att_fighters;
-        //     $att_fighters->save();
-        // }
-        // // Round  1 Frigate
-        // if ($pt_att_frigate > $pt_def_fighter) {
-        //     $reductionfighter = $nb_def_fighters->quantity * 0.3;
-        //     $newQuantity = $nb_def_fighters->quantity - $reductionfighter;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_def_fighters->quantity = $newQuantity;
-        //     $nb_def_fighters->save();
-        //     // Round  2 Frigate
-        //     if ($pt_att_frigate > $pt_def_frigate) {
-        //         $reductionfrigate = $nb_def_frigates->quantity * 0.3;
-        //         $newQuantity = $nb_def_frigates->quantity - $reductionfrigate;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_def_frigates->quantity = $newQuantity;
-        //         $nb_def_frigates->save();
-
-        //         // Round  3 Frigate
-        //         if ($pt_att_frigate > $pt_def_cruiser) {
-        //             $reductioncruiser = $nb_def_cruisers->quantity * 0.3;
-        //             $newQuantity = $nb_def_cruisers->quantity - $reductioncruiser;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_def_cruisers->quantity = $newQuantity;
-        //             $nb_def_cruisers->save();
-
-        //             // Round 4 Frigate
-        //             if ($pt_att_frigate > $pt_def_destroyer) {
-        //                 $reductiondestroyer = $nb_def_destroyers->quantity * 0.3;
-        //                 $newQuantity = $nb_def_destroyers->quantity - $reductiondestroyer;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_def_destroyers->quantity = $newQuantity;
-        //                 $nb_def_destroyers->save();
-        //                 $win_frigate = "attacker win";
-        //             } else {
-        //                 $win_frigate  = "round 4";
-        //                 $reductionfrigate = $nb_att_frigates * 0.3;
-        //                 $newQuantity = $nb_att_frigates - $reductionfrigate;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_att_frigates = $newQuantity;
-        //                 $att_frigates->quantity = $nb_att_frigates;
-        //                 $att_frigates->save();
-        //             }
-        //         } else {
-        //             $win_frigate  = "round 3";
-        //             $reductionfrigate = $nb_att_frigates * 0.3;
-        //             $newQuantity = $nb_att_frigates - $reductionfrigate;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_att_frigates = $newQuantity;
-        //             $att_frigates->quantity = $nb_att_frigates;
-        //             $att_frigates->save();
-        //         }
-        //     } else {
-        //         $win_frigate  = " round 2";
-        //         $reductionfrigate = $nb_att_frigates * 0.3;
-        //         $newQuantity = $nb_att_frigates - $reductionfrigate;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_att_frigates = $newQuantity;
-        //         $att_frigates->quantity = $nb_att_frigates;
-        //         $att_frigates->save();
-        //     }
-        // } else {
-        //     $win_frigate  = "round 1";
-        //     $reductionfrigate = $nb_att_frigates * 0.3;
-        //     $newQuantity = $nb_att_frigates - $reductionfrigate;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_att_frigates = $newQuantity;
-        //     $att_frigates->quantity = $nb_att_frigates;
-        //     $att_frigates->save();
-        // }
-        // // Round  1 Cruiser
-        // if ($pt_att_cruiser > $pt_def_fighter) {
-        //     $reductionfighter = $nb_def_fighters->quantity * 0.3;
-        //     $newQuantity = $nb_def_fighters->quantity - $reductionfighter;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_def_fighters->quantity = $newQuantity;
-        //     $nb_def_fighters->save();
-
-        //     // Round  2 Cruiser
-        //     if ($pt_att_cruiser > $pt_def_frigate) {
-        //         $reductionfrigate = $nb_def_frigates->quantity * 0.3;
-        //         $newQuantity = $nb_def_frigates->quantity - $reductionfrigate;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_def_frigates->quantity = $newQuantity;
-        //         $nb_def_frigates->save();
-
-        //         // Round  3 Cruiser
-        //         if ($pt_att_cruiser > $pt_def_cruiser) {
-        //             $reductioncruiser = $nb_def_cruisers->quantity * 0.3;
-        //             $newQuantity = $nb_def_cruisers->quantity - $reductioncruiser;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_def_cruisers->quantity = $newQuantity;
-        //             $nb_def_cruisers->save();
-
-
-        //             // Round 4 Cruiser
-        //             if ($pt_att_cruiser > $pt_def_destroyer) {
-        //                 $reductiondestroyer = $nb_def_destroyers->quantity * 0.3;
-        //                 $newQuantity = $nb_def_destroyers->quantity - $reductiondestroyer;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_def_destroyers->quantity = $newQuantity;
-        //                 $nb_def_destroyers->save();
-        //                 $win_cruiser = "attacker win";
-        //             } else {
-        //                 $win_cruiser  = " round 4";
-        //                 $reductioncruiser = $nb_att_cruisers * 0.3;
-        //                 $newQuantity = $nb_att_cruisers - $reductioncruiser;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_att_cruisers = $newQuantity;
-        //                 $att_cruisers->quantity = $nb_att_cruisers;
-        //                 $att_cruisers->save();
-        //             }
-        //         } else {
-        //             $win_cruiser  = "round 3";
-        //             $reductioncruiser = $nb_att_cruisers * 0.3;
-        //             $newQuantity = $nb_att_cruisers - $reductioncruiser;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_att_cruisers = $newQuantity;
-        //             $att_cruisers->quantity = $nb_att_cruisers;
-        //             $att_cruisers->save();
-        //         }
-        //     } else {
-        //         $win_cruiser  = "round 2";
-        //         $reductioncruiser = $nb_att_cruisers * 0.3;
-        //         $newQuantity = $nb_att_cruisers - $reductioncruiser;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_att_cruisers = $newQuantity;
-        //         $att_cruisers->quantity = $nb_att_cruisers;
-        //         $att_cruisers->save();
-        //     }
-        // } else {
-        //     $win_cruiser  = "round 1";
-        //     $reductioncruiser = $nb_att_cruisers * 0.3;
-        //     $newQuantity = $nb_att_cruisers - $reductioncruiser;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_att_cruisers = $newQuantity;
-        //     $att_cruisers->quantity = $nb_att_cruisers;
-        //     $att_cruisers->save();
-        // }
-        // // Round  1 Destroyer
-        // if ($pt_att_destroyer > $pt_def_fighter) {
-        //     $reductionfighter = $nb_def_fighters->quantity * 0.3;
-        //     $newQuantity = $nb_def_fighters->quantity - $reductionfighter;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_def_fighters->quantity = $newQuantity;
-        //     $nb_def_fighters->save();
-
-        //     // Round  2 Destroyer
-        //     if ($pt_att_destroyer > $pt_def_frigate) {
-        //         $reductionfrigate = $nb_def_frigates->quantity * 0.3;
-        //         $newQuantity = $nb_def_frigates->quantity - $reductionfrigate;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_def_frigates->quantity = $newQuantity;
-        //         $nb_def_frigates->save();
-
-        //         // Round  3 Destroyer
-        //         if ($pt_att_destroyer > $pt_def_cruiser) {
-        //             $reductioncruiser = $nb_def_cruisers->quantity * 0.3;
-        //             $newQuantity = $nb_def_cruisers->quantity - $reductioncruiser;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_def_cruisers->quantity = $newQuantity;
-        //             $nb_def_cruisers->save();
-
-        //             // Round 4 Destroyer
-        //             if ($pt_att_destroyer > $pt_def_destroyer) {
-        //                 $reductiondestroyer = $nb_def_destroyers->quantity * 0.3;
-        //                 $newQuantity = $nb_def_destroyers->quantity - $reductiondestroyer;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_def_destroyers->quantity = $newQuantity;
-        //                 $nb_def_cruisers->save();
-        //                 $win_destroyer = "attacker win";
-        //             } else {
-        //                 $win_destroyer  = "round 4";
-        //                 $reductiondestroyer = $nb_att_destroyers * 0.3;
-        //                 $newQuantity = $nb_att_destroyers - $reductiondestroyer;
-        //                 $newQuantity = ceil($newQuantity);
-        //                 $nb_att_destroyers = $newQuantity;
-        //                 $att_destroyers->quantity = $nb_att_destroyers;
-        //                 $att_destroyers->save();
-        //             }
-        //         } else {
-        //             $win_destroyer  = "round 3";
-        //             $reductiondestroyer = $nb_att_destroyers * 0.3;
-        //             $newQuantity = $nb_att_destroyers - $reductiondestroyer;
-        //             $newQuantity = ceil($newQuantity);
-        //             $nb_att_destroyers = $newQuantity;
-        //             $att_destroyers->quantity = $nb_att_destroyers;
-        //             $att_destroyers->save();
-        //         }
-        //     } else {
-        //         $win_destroyer  = "round 2";
-        //         $reductiondestroyer = $nb_att_destroyers * 0.3;
-        //         $newQuantity = $nb_att_destroyers - $reductiondestroyer;
-        //         $newQuantity = ceil($newQuantity);
-        //         $nb_att_destroyers = $newQuantity;
-        //         $att_destroyers->quantity = $nb_att_destroyers;
-        //         $att_destroyers->save();
-        //     }
-        // } else {
-        //     $win_destroyer  = "round 1";
-        //     $reductiondestroyer = $nb_att_destroyers * 0.3;
-        //     $newQuantity = $nb_att_destroyers - $reductiondestroyer;
-        //     $newQuantity = ceil($newQuantity);
-        //     $nb_att_destroyers = $newQuantity;
-        //     $att_destroyers->quantity = $nb_att_destroyers;
-        //     $att_destroyers->save();
-        // }
-
-        // mise à jour des pertes des vaisseaux
 
     }
 }

@@ -65,7 +65,7 @@ class AuthController extends RoutingController
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string',
             'username' => 'required|string|unique:users',
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'required|date|before:-18 years',
             'name' => 'required|string',
             'picture' => 'required|string'
         ]);
@@ -216,31 +216,14 @@ class AuthController extends RoutingController
             ]
         ]);
     }
-    public function destroy(Request $request): HttpFoundationRedirectResponse
-
+    public function destroy()
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
-        $user = $request->user();
-
-        Auth::logout();
-
+        $id = Auth::user()->id;
+        $user = User::find($id);
         $user->delete();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return response()->json([
+            'status' => 'success'
+        ]);
     }
-    // return response()->json([
-    //    'status' => 'success',
-    //    'user' => Auth::user(),
-    //   'authorisation' => [
-    //         'token' => Auth::delete(),
-    //         'type' => 'bearer',
-    //      ]
-    //  ]);
-    // }
 }
