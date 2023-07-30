@@ -20,8 +20,8 @@ return new class extends Migration
             ->onDelete('cascade')
             ->onUpdate('cascade');
             $table->string('planetary_system_name')->nullable();
-            $table->boolean('is_defender');
-            $table->boolean('is_winner');
+            $table->boolean('is_defender')->nullable();
+            $table->boolean('is_winner')->nullable();
             $table->integer('nb_fighter');
             $table->integer('nb_frigate');
             $table->integer('nb_cruiser');
