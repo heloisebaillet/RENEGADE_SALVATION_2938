@@ -14,7 +14,10 @@ return new class extends Migration
     {
         Schema::create('planetary_system', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('user_id', 50)->foreign('users.id');
+            $table->foreignIdFor(User::class)
+            ->constrained()
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
             $table->integer('x_coord');
             $table->integer('y_coord');
             $table->timestamp('created_at')->useCurrent();
