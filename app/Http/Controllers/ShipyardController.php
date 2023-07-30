@@ -56,9 +56,9 @@ class ShipyardController extends Controller
         $user_id= Auth::id(); 
         $shipyard= Shipyard::where('user_id', $user_id)->whereNull('type')->first();
         if ($shipyard == ""){
-            return Response()->json(['success' => 'false'], 400);
+            return Response()->json(['success' => false], 200);
         }
         else{
-        return Response()->json($shipyard, 200);}
+        return Response()->json(['success' => true], 200);}
     }
 }
