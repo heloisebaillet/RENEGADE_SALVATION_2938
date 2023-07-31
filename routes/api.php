@@ -65,7 +65,10 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('ressources.read');
     Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
         ->name('ressources.update');
+        Route::get('ressources/1000', [RessourcesController::class, 'stripe'])
+        ->name('ressources.stripe');
 
+        
     /* Route du controller RjoundController*/
     Route::get("/round", [RoundController::class, "read"]);
 
@@ -90,6 +93,9 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.attack');
     Route::get('/planetary-systems', [PlanetarySystemController::class, 'index1']);
 });
+
+
+
 
 /* Route du controller AuthController avec JWT  */
 Route::controller(AuthController::class)->group(function () {

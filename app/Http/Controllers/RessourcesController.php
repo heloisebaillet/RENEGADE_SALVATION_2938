@@ -154,5 +154,12 @@ class RessourcesController extends Controller
             }
         }
     }
+    public function stripe(){
+        $user_id = Auth::user()->id;
+        $update = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
+        $update->quantity = $update->quantity + 1000;
+        $update->save();
+
+    }
    
 }
