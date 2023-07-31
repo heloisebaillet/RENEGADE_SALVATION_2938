@@ -39,7 +39,7 @@ class WarehouseController extends Controller
     {
         $user_id = Auth::user()->id;
         // si le paramètre n'est pas vide, choix du type de batiment
-        $warehouseDetails = Warehouse::select('quantity')->where('user_id', $user_id)->get();
+        $warehouseDetails = Warehouse::select('quantity')->where('user_id', $user_id)->first();
         return response()->json($warehouseDetails, 200);
     }
     public function update()
