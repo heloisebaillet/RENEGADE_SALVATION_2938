@@ -1,11 +1,11 @@
 <?php
+// PlanetarySystem.php (modèle Eloquent)
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class PlanetarySystem extends Model
-
 {
     protected $table = 'planetary_system';
     protected $fillable = [
@@ -17,6 +17,6 @@ class PlanetarySystem extends Model
     // Relation avec le modèle User pour récupérer le nom du système planétaire associé
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class);
     }
 }
