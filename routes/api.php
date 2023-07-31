@@ -64,6 +64,8 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('ressources.read');
     Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
         ->name('ressources.update');
+        Route::put('ressources/100', [RessourcesController::class, 'stripe'])
+        ->name('ressources.update');
 
     /* Route du controller RjoundController*/
     Route::get("/round", [RoundController::class, "read"]);
