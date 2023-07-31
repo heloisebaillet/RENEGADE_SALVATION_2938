@@ -57,7 +57,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string',
             'username' => 'required|string|unique:users',
-            'date_of_birth' => 'required|date',
+            'date_of_birth' => 'required|date|before:-18 years',
             'name' => 'required|string',
             'picture' => 'required|string'
         ]);
@@ -206,6 +206,17 @@ class AuthController extends Controller
                 'token' => Auth::refresh(),
                 'type' => 'bearer',
             ]
+        ]);
+    }
+
+    public function destroy()
+    {
+        $id = Auth::user()->id;
+        $user = User::find($id);
+        $user->delete();
+
+        return response()->json([
+            'status' => 'success'
         ]);
     }
 }

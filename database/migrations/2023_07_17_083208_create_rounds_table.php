@@ -12,24 +12,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('planetary_system', function (Blueprint $table) {
+        Schema::create('rounds', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('uuid',100);
             $table->foreignIdFor(User::class)
             ->constrained()
             ->onDelete('cascade')
             ->onUpdate('cascade');
-            $table->integer('x_coord');
-            $table->integer('y_coord');
+            $table->string('planetary_system_name')->nullable();
+            $table->boolean('is_defender')->nullable();
+            $table->boolean('is_winner')->nullable();
+            $table->integer('nb_fighter');
+            $table->integer('nb_frigate');
+            $table->integer('nb_cruiser');
+            $table->integer('nb_destroyer');
+            $table->integer('nb_round')->default(0);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
     }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('planetary_system');
+        Schema::dropIfExists('rounds');
     }
 };

@@ -154,24 +154,12 @@ class RessourcesController extends Controller
             }
         }
     }
-    public function transferResources(Battle $battle)
-    {
-        if ($battle->winner_id === $battle->attacker_id) {
-            //calcul des 10%
-            $looserResources = $battle->looserResources;
-            $resourcesToTransfer = $looserResources->amount * 0.1;
+    public function stripe(){
+        $user_id = Auth::user()->id;
+        $update = Ressources::where('user_id', $user_id)->where('type', 'ore')->first();
+        $update->quantity = $update->quantity + 1000;
+        $update->save();
 
-            //mise  à jour des ressources du gagnant
-            $winnerResources = $battle->winnerResources;
-            $winnerResources->amount += $resourcesToTransfer;
-            $winnerResources->save();
-            //mise  à jour des ressources du perdant
-            $looserResources->amount -= $resourcesToTransfer;
-            $looserResources->save();
-
-            //mise  à jour des ressources volées
-            $battle->ressources_looted = $resourcesToTransfer;
-            $battle->save();
-        }
     }
+   
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\StructureController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BattleController;
 use App\Http\Controllers\ForgetPasswordController;
+use App\Http\Controllers\RoundController;
 use App\Http\Controllers\ShipyardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +64,10 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('ressources.read');
     Route::put('ressources/{type?}/{operation?}/{qty?}', [RessourcesController::class, 'update'])
         ->name('ressources.update');
+        
+    /* Route du controller RjoundController*/
+    Route::get("/round", [RoundController::class, "read"]);
+
 
     /* Routes des entrepôts */
     /* Désactivation de la route create
@@ -80,10 +85,16 @@ Route::middleware('jwt.verify')->group(function () {
         ->name('battle.create');
     Route::get('/battle', [BattleController::class, 'read'])
         ->name('battle.read');
-        Route::post('/attack', [BattleController::class, 'attack'])
+    Route::post('/attack', [BattleController::class, 'attack'])
         ->name('battle.attack');
     Route::get('/planetary-systems', [PlanetarySystemController::class, 'index1']);
 });
+
+// A sécuriser pour stripe
+
+Route::get('ressources/1000', [RessourcesController::class, 'stripe'])
+        ->name('ressources.stripe');
+
 
 /* Route du controller AuthController avec JWT  */
 Route::controller(AuthController::class)->group(function () {
@@ -91,9 +102,11 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
 
     Route::match(['get', 'post'], 'update', 'updateProfile');
-    
+
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
+
+    Route::delete('/delete/', 'destroy');
 });
 
 
@@ -104,6 +117,5 @@ Route::post("/forget-password", [ForgetPasswordController::class, "forgetPasswor
     ->name('forget.password.post');
 Route::get("/reset-password/{token}", [ForgetPasswordController::class, "resetPassword"])
     ->name('reset.password');
-Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost'])
+Route::post('/reset-password/', [ForgetPasswordController::class, 'resetPasswordPost'])
     ->name('reset.password.post');
-
